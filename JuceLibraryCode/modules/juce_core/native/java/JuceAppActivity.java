@@ -30,6 +30,7 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+$$JuceAndroidCameraImports$$       // If you get an error here, you need to re-save your project with the Projucer!
 import android.net.http.SslError;
 import android.net.Uri;
 import android.os.Bundle;
@@ -77,7 +78,7 @@ $$JuceAndroidMidiImports$$         // If you get an error here, you need to re-s
 
 
 //==============================================================================
-public class JuceAppActivity   extends Activity
+public class JuceAppActivity   extends $$JuceAppActivityBaseClass$$
 {
     //==============================================================================
     static
@@ -114,6 +115,7 @@ public class JuceAppActivity   extends Activity
     private static final int JUCE_PERMISSIONS_BLUETOOTH_MIDI = 2;
     private static final int JUCE_PERMISSIONS_READ_EXTERNAL_STORAGE = 3;
     private static final int JUCE_PERMISSIONS_WRITE_EXTERNAL_STORAGE = 4;
+    private static final int JUCE_PERMISSIONS_CAMERA = 5;
 
     private static String getAndroidPermissionName (int permissionID)
     {
@@ -124,6 +126,7 @@ public class JuceAppActivity   extends Activity
                                                           // use string value as this is not defined in SDKs < 16
             case JUCE_PERMISSIONS_READ_EXTERNAL_STORAGE:  return "android.permission.READ_EXTERNAL_STORAGE";
             case JUCE_PERMISSIONS_WRITE_EXTERNAL_STORAGE: return Manifest.permission.WRITE_EXTERNAL_STORAGE;
+            case JUCE_PERMISSIONS_CAMERA:                 return Manifest.permission.CAMERA;
         }
 
         // unknown permission ID!
@@ -191,6 +194,7 @@ public class JuceAppActivity   extends Activity
         setVolumeControlStream (AudioManager.STREAM_MUSIC);
 
         permissionCallbackPtrMap = new HashMap<Integer, Long>();
+        appPausedResumedListeners = new HashMap<Long, AppPausedResumedListener>();
     }
 
     @Override
@@ -207,6 +211,11 @@ public class JuceAppActivity   extends Activity
     {
         suspendApp();
 
+        Long[] keys = appPausedResumedListeners.keySet().toArray (new Long[appPausedResumedListeners.keySet().size()]);
+
+        for (Long k : keys)
+            appPausedResumedListeners.get (k).appPaused();
+
         try
         {
             Thread.sleep (1000); // This is a bit of a hack to avoid some hard-to-track-down
@@ -222,9 +231,10 @@ public class JuceAppActivity   extends Activity
         super.onResume();
         resumeApp();
 
-        // Ensure that navigation/status bar visibility is correctly restored.
-        for (int i = 0; i < viewHolder.getChildCount(); ++i)
-            ((ComponentPeerView) viewHolder.getChildAt (i)).appResumed();
+        Long[] keys = appPausedResumedListeners.keySet().toArray (new Long[appPausedResumedListeners.keySet().size()]);
+
+        for (Long k : keys)
+            appPausedResumedListeners.get (k).appResumed();
     }
 
     @Override
@@ -238,6 +248,32 @@ public class JuceAppActivity   extends Activity
     {
         launchApp (getApplicationInfo().publicSourceDir,
                    getApplicationInfo().dataDir);
+    }
+
+    // Need to override this as the default implementation always finishes the activity.
+    @Override
+    public void onBackPressed()
+    {
+        ComponentPeerView focusedView = getViewWithFocusOrDefaultView();
+
+        if (focusedView == null)
+            return;
+
+        focusedView.backButtonPressed();
+    }
+
+    private ComponentPeerView getViewWithFocusOrDefaultView()
+    {
+        for (int i = 0; i < viewHolder.getChildCount(); ++i)
+        {
+            if (viewHolder.getChildAt (i).hasFocus())
+                return (ComponentPeerView) viewHolder.getChildAt (i);
+        }
+
+        if (viewHolder.getChildCount() > 0)
+            return (ComponentPeerView) viewHolder.getChildAt (0);
+
+        return null;
     }
 
     //==============================================================================
@@ -325,11 +361,14 @@ public class JuceAppActivity   extends Activity
     {
         ComponentPeerView v = new ComponentPeerView (this, opaque, host);
         viewHolder.addView (v);
+        addAppPausedResumedListener (v, host);
         return v;
     }
 
     public final void deleteView (ComponentPeerView view)
     {
+        removeAppPausedResumedListener (view, view.host);
+
         view.host = 0;
 
         ViewGroup group = (ViewGroup) (view.getParent());
@@ -548,8 +587,27 @@ public class JuceAppActivity   extends Activity
     public native void alertDismissed (long callback, int id);
 
     //==============================================================================
+    public interface AppPausedResumedListener
+    {
+        void appPaused();
+        void appResumed();
+    }
+
+    private Map<Long, AppPausedResumedListener> appPausedResumedListeners;
+
+    public void addAppPausedResumedListener (AppPausedResumedListener l, long listenerHost)
+    {
+        appPausedResumedListeners.put (new Long (listenerHost), l);
+    }
+
+    public void removeAppPausedResumedListener (AppPausedResumedListener l, long listenerHost)
+    {
+        appPausedResumedListeners.remove (new Long (listenerHost));
+    }
+
+    //==============================================================================
     public final class ComponentPeerView extends ViewGroup
-                                         implements View.OnFocusChangeListener
+                                         implements View.OnFocusChangeListener, AppPausedResumedListener
     {
         public ComponentPeerView (Context context, boolean opaque_, long host)
         {
@@ -676,6 +734,7 @@ public class JuceAppActivity   extends Activity
         private native void handleKeyDown (long host, int keycode, int textchar);
         private native void handleKeyUp (long host, int keycode, int textchar);
         private native void handleBackButton (long host);
+        private native void handleKeyboardHidden (long host);
 
         public void showKeyboard (String type)
         {
@@ -687,12 +746,22 @@ public class JuceAppActivity   extends Activity
                 {
                     imm.showSoftInput (this, android.view.inputmethod.InputMethodManager.SHOW_IMPLICIT);
                     imm.setInputMethod (getWindowToken(), type);
+                    keyboardDismissListener.startListening();
                 }
                 else
                 {
                     imm.hideSoftInputFromWindow (getWindowToken(), 0);
+                    keyboardDismissListener.stopListening();
                 }
             }
+        }
+
+        public void backButtonPressed()
+        {
+            if (host == 0)
+                return;
+
+            handleBackButton (host);
         }
 
         @Override
@@ -708,7 +777,7 @@ public class JuceAppActivity   extends Activity
                     return super.onKeyDown (keyCode, event);
                 case KeyEvent.KEYCODE_BACK:
                 {
-                    handleBackButton (host);
+                    ((Activity) getContext()).onBackPressed();
                     return true;
                 }
 
@@ -748,6 +817,65 @@ public class JuceAppActivity   extends Activity
 
             return false;
         }
+
+        //==============================================================================
+        private final class KeyboardDismissListener
+        {
+            public KeyboardDismissListener (ComponentPeerView viewToUse)
+            {
+                view = viewToUse;
+            }
+
+            private void startListening()
+            {
+                view.getViewTreeObserver().addOnGlobalLayoutListener(viewTreeObserver);
+            }
+
+            private void stopListening()
+            {
+                view.getViewTreeObserver().removeGlobalOnLayoutListener(viewTreeObserver);
+            }
+
+            private class TreeObserver implements ViewTreeObserver.OnGlobalLayoutListener
+            {
+                TreeObserver()
+                {
+                    keyboardShown = false;
+                }
+
+                @Override
+                public void onGlobalLayout()
+                {
+                    Rect r = new Rect();
+
+                    ViewGroup parentView = (ViewGroup) getParent();
+
+                    if (parentView == null)
+                        return;
+
+                    parentView.getWindowVisibleDisplayFrame (r);
+
+                    int diff = parentView.getHeight() - (r.bottom - r.top);
+
+                    // Arbitrary threshold, surely keyboard would take more than 20 pix.
+                    if (diff < 20 && keyboardShown)
+                    {
+                        keyboardShown = false;
+                        handleKeyboardHidden (view.host);
+                    }
+
+                    if (! keyboardShown && diff > 20)
+                        keyboardShown = true;
+                };
+
+                private boolean keyboardShown;
+            };
+
+            private ComponentPeerView view;
+            private TreeObserver viewTreeObserver = new TreeObserver();
+        }
+
+        private KeyboardDismissListener keyboardDismissListener = new KeyboardDismissListener(this);
 
         // this is here to make keyboard entry work on a Galaxy Tab2 10.1
         @Override
@@ -827,13 +955,25 @@ public class JuceAppActivity   extends Activity
         }
 
         //==============================================================================
+        private native void handleAppPaused (long host);
         private native void handleAppResumed (long host);
 
+        @Override
+        public void appPaused()
+        {
+            if (host == 0)
+                return;
+
+            handleAppPaused (host);
+        }
+
+        @Override
         public void appResumed()
         {
             if (host == 0)
                 return;
 
+            // Ensure that navigation/status bar visibility is correctly restored.
             handleAppResumed (host);
         }
     }
@@ -1469,6 +1609,8 @@ $$JuceAndroidWebViewNativeCode$$ // If you get an error here, you need to re-sav
         private long host;
         private final Object hostLock = new Object();
     }
+
+    $$JuceAndroidCameraCode$$ // If you get an error here, you need to re-save your project with the Projucer!
 
     //==============================================================================
     public static final String getLocaleValue (boolean isRegion)

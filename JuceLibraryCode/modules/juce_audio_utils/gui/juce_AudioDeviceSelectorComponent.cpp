@@ -33,19 +33,18 @@ struct SimpleDeviceManagerInputLevelMeter  : public Component,
     SimpleDeviceManagerInputLevelMeter (AudioDeviceManager& m)  : manager (m)
     {
         startTimerHz (20);
-        manager.enableInputLevelMeasurement (true);
+        inputLevelGetter = manager.getInputLevelGetter();
     }
 
     ~SimpleDeviceManagerInputLevelMeter()
     {
-        manager.enableInputLevelMeasurement (false);
     }
 
     void timerCallback() override
     {
         if (isShowing())
         {
-            auto newLevel = (float) manager.getCurrentInputLevel();
+            auto newLevel = (float) inputLevelGetter->getCurrentLevel();
 
             if (std::abs (level - newLevel) > 0.005f)
             {
@@ -66,6 +65,7 @@ struct SimpleDeviceManagerInputLevelMeter  : public Component,
     }
 
     AudioDeviceManager& manager;
+    AudioDeviceManager::LevelMeter::Ptr inputLevelGetter;
     float level = 0;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SimpleDeviceManagerInputLevelMeter)
@@ -116,7 +116,7 @@ public:
 
             g.setFont (height * 0.6f);
             g.setColour (findColour (ListBox::textColourId, true).withMultipliedAlpha (enabled ? 1.0f : 0.6f));
-            g.drawText (item, x, 0, width - x - 2, height, Justification::centredLeft, true);
+            g.drawText (item, x + 5, 0, width - x - 5, height, Justification::centredLeft, true);
         }
     }
 
@@ -178,7 +178,7 @@ private:
 
     int getTickX() const
     {
-        return getRowHeight() + 5;
+        return getRowHeight();
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiInputSelectorComponentListBox)
@@ -515,11 +515,11 @@ private:
     AudioIODeviceType& type;
     const AudioDeviceSetupDetails setup;
 
-    ScopedPointer<ComboBox> outputDeviceDropDown, inputDeviceDropDown, sampleRateDropDown, bufferSizeDropDown;
-    ScopedPointer<Label> outputDeviceLabel, inputDeviceLabel, sampleRateLabel, bufferSizeLabel, inputChanLabel, outputChanLabel;
-    ScopedPointer<TextButton> testButton;
-    ScopedPointer<Component> inputLevelMeter;
-    ScopedPointer<TextButton> showUIButton, showAdvancedSettingsButton, resetDeviceButton;
+    std::unique_ptr<ComboBox> outputDeviceDropDown, inputDeviceDropDown, sampleRateDropDown, bufferSizeDropDown;
+    std::unique_ptr<Label> outputDeviceLabel, inputDeviceLabel, sampleRateLabel, bufferSizeLabel, inputChanLabel, outputChanLabel;
+    std::unique_ptr<TextButton> testButton;
+    std::unique_ptr<Component> inputLevelMeter;
+    std::unique_ptr<TextButton> showUIButton, showAdvancedSettingsButton, resetDeviceButton;
 
     void showCorrectDeviceName (ComboBox* box, bool isInput)
     {
@@ -947,7 +947,7 @@ public:
     };
 
 private:
-    ScopedPointer<ChannelSelectorListBox> inputChanList, outputChanList;
+    std::unique_ptr<ChannelSelectorListBox> inputChanList, outputChanList;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioDeviceSettingsPanel)
 };

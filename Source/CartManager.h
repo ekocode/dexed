@@ -25,6 +25,9 @@
 #include "PluginData.h"
 #include "ProgramListBox.h"
 #include "PluginData.h"
+#include "SysexPresetsLibrary.h"
+
+class SysexPresetsLibrary;
 
 class CartManager  : public Component, public Button::Listener, public DragAndDropContainer, public FileBrowserListener
     , public ProgramListBoxListener, public KeyListener {
@@ -33,6 +36,7 @@ class CartManager  : public Component, public Button::Listener, public DragAndDr
     ScopedPointer<TextButton> saveButton;
     ScopedPointer<TextButton> closeButton;
     ScopedPointer<TextButton> fileMgrButton;
+    ScopedPointer<TextButton> presetsLibraryButton;
     ScopedPointer<TextButton> getDXPgmButton;
     ScopedPointer<TextButton> getDXCartButton;
     
@@ -44,6 +48,9 @@ class CartManager  : public Component, public Button::Listener, public DragAndDr
     FileTreeComponent *cartBrowser;
     TimeSliceThread *timeSliceThread;
     DirectoryContentsList *cartBrowserList;
+    SysexPresetsLibrary *presetsLibrary;
+
+    
         
     File cartDir;
     

@@ -33,6 +33,8 @@ namespace juce
     another reader.
 
     @see AudioFormatReader
+
+    @tags{Audio}
 */
 class JUCE_API  BufferingAudioReader  : public AudioFormatReader,
                                         private TimeSliceClient
@@ -65,7 +67,7 @@ public:
                       int64 startSampleInFile, int numSamples) override;
 
 private:
-    ScopedPointer<AudioFormatReader> source;
+    std::unique_ptr<AudioFormatReader> source;
     TimeSliceThread& thread;
     int64 nextReadPosition;
     const int numBlocks;

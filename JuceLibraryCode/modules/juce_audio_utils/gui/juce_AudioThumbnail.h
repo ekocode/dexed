@@ -45,6 +45,8 @@ namespace juce
     be loaded and saved to avoid having to scan the file again.
 
     @see AudioThumbnailCache, AudioThumbnailBase
+
+    @tags{Audio}
 */
 class JUCE_API  AudioThumbnail    : public AudioThumbnailBase
 {
@@ -206,8 +208,8 @@ private:
     friend struct ContainerDeletePolicy<ThumbData>;
     friend struct ContainerDeletePolicy<CachedWindow>;
 
-    ScopedPointer<LevelDataSource> source;
-    ScopedPointer<CachedWindow> window;
+    std::unique_ptr<LevelDataSource> source;
+    std::unique_ptr<CachedWindow> window;
     OwnedArray<ThumbData> channels;
 
     int32 samplesPerThumbSample = 0;

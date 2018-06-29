@@ -36,6 +36,8 @@ namespace juce
     to tell any listeners.
 
     @see FileListComponent, FileBrowserComponent
+
+    @tags{GUI}
 */
 class JUCE_API  DirectoryContentsList   : public ChangeBroadcaster,
                                           private TimeSliceClient
@@ -206,7 +208,7 @@ private:
     CriticalSection fileListLock;
     OwnedArray<FileInfo> files;
 
-    ScopedPointer<DirectoryIterator> fileFindHandle;
+    std::unique_ptr<DirectoryIterator> fileFindHandle;
     bool volatile shouldStop;
 
     int useTimeSlice() override;

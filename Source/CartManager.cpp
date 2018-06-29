@@ -94,10 +94,26 @@ CartManager::CartManager(DexedAudioProcessorEditor *editor) : Component("CartMan
     cartBrowser->addKeyListener(this);
     addAndMakeVisible(cartBrowser);
     
+    
+    for(int i=0;i<cartBrowserList->getNumFiles();i++)
+    {
+        DirectoryContentsList::FileInfo infos;
+        cartBrowserList->getFileInfo(i,infos);
+        TRACE("%s",infos.filename.toStdString().c_str());
+    }
+    
+    
+    
+    
     cartBrowser->setBounds(23, 18, 590, 384);
     cartBrowser->setDragAndDropDescription("Sysex Browser");
     cartBrowser->addListener(this);
-            
+    
+    presetsLibrary = new SysexPresetsLibrary(mainWindow,cartBrowserList);
+    presetsLibrary->setBounds(23, 18, 812, 384);
+    //addAndMakeVisible(presetsLibrary);
+    addChildComponent(presetsLibrary);
+    
     addAndMakeVisible(closeButton = new TextButton("CLOSE"));
     closeButton->setBounds(4, 545, 50, 30);
     closeButton->addListener(this);
@@ -113,6 +129,11 @@ CartManager::CartManager(DexedAudioProcessorEditor *editor) : Component("CartMan
     addAndMakeVisible(fileMgrButton = new TextButton("SHOW DIR"));
     fileMgrButton->setBounds(148, 545, 70, 30);
     fileMgrButton->addListener(this);
+    
+    addAndMakeVisible(presetsLibraryButton = new TextButton("PRESETS LIBRARY"));
+    presetsLibraryButton->setBounds(250, 545, 120, 30);
+    presetsLibraryButton->addListener(this);
+    
 /*
  *
  * I've removed this since it only works on the DX7 II. TBC.
@@ -133,6 +154,7 @@ CartManager::~CartManager() {
     delete cartBrowser;
     delete cartBrowserList;
     delete timeSliceThread;
+    delete presetsLibrary;
 }
 
 void CartManager::paint(Graphics &g) {
@@ -163,6 +185,22 @@ void CartManager::buttonClicked(juce::Button *buttonThatWasClicked) {
     if ( buttonThatWasClicked == closeButton ) {
         mainWindow->startTimer(100);
         setVisible(false);
+        return;
+    }
+    
+    if ( buttonThatWasClicked == presetsLibraryButton ) {
+        if(presetsLibrary->isVisible())
+        {
+            presetsLibraryButton->setButtonText("CART BROWSER");
+            presetsLibrary->setVisible(false);
+            
+        }
+        else{
+            presetsLibraryButton->setButtonText("PRESETS LIBRARY");
+            presetsLibrary->setVisible(true);
+        }
+        
+        //TRACE("Click presets");
         return;
     }
     

@@ -40,6 +40,8 @@ namespace juce
 
     To play back a graph through an audio device, you might want to use an
     AudioProcessorPlayer object.
+
+    @tags{Audio}
 */
 class JUCE_API  AudioProcessorGraph   : public AudioProcessor,
                                         public ChangeBroadcaster,
@@ -56,7 +58,7 @@ public:
     ~AudioProcessorGraph();
 
     /** Each node in the graph has a UID of this type. */
-    typedef uint32 NodeID;
+    using NodeID = uint32;
 
     //==============================================================================
     /** A special index that represents the midi channel of a node.
@@ -107,8 +109,15 @@ public:
         NamedValueSet properties;
 
         //==============================================================================
+        /** Returns if the node is bypassed or not. */
+        bool isBypassed() const noexcept;
+
+        /** Tell this node to bypass processing. */
+        void setBypassed (bool shouldBeBypassed) noexcept;
+
+        //==============================================================================
         /** A convenient typedef for referring to a pointer to a node object. */
-        typedef ReferenceCountedObjectPtr<Node> Ptr;
+        using Ptr = ReferenceCountedObjectPtr<Node>;
 
     private:
         //==============================================================================
@@ -122,9 +131,9 @@ public:
             bool operator== (const Connection&) const noexcept;
         };
 
-        const ScopedPointer<AudioProcessor> processor;
+        const std::unique_ptr<AudioProcessor> processor;
         Array<Connection> inputs, outputs;
-        bool isPrepared = false;
+        bool isPrepared = false, bypassed = false;
 
         Node (NodeID, AudioProcessor*) noexcept;
 
@@ -371,12 +380,12 @@ private:
 
     struct RenderSequenceFloat;
     struct RenderSequenceDouble;
-    ScopedPointer<RenderSequenceFloat> renderSequenceFloat;
-    ScopedPointer<RenderSequenceDouble> renderSequenceDouble;
+    std::unique_ptr<RenderSequenceFloat> renderSequenceFloat;
+    std::unique_ptr<RenderSequenceDouble> renderSequenceDouble;
 
     friend class AudioGraphIOProcessor;
 
-    bool isPrepared = false;
+    Atomic<int> isPrepared { 0 };
 
     void topologyChanged();
     void handleAsyncUpdate() override;
