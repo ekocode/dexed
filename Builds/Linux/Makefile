@@ -97,7 +97,8 @@ OBJECTS_SHARED_CODE := \
   $(JUCE_OBJDIR)/PluginFx_d84f776e.o \
   $(JUCE_OBJDIR)/EngineMkI_615efdaa.o \
   $(JUCE_OBJDIR)/EngineOpl_d5a0e5ea.o \
-  $(JUCE_OBJDIR)/SysexPresetsLibrary_cb273e8.o \
+  $(JUCE_OBJDIR)/PresetBowserComponent_cb07e5c9.o \
+  $(JUCE_OBJDIR)/PresetsLibrary_ed69d8b0.o \
   $(JUCE_OBJDIR)/PluginEditor_94d4fb09.o \
   $(JUCE_OBJDIR)/CartManager_8ad0044e.o \
   $(JUCE_OBJDIR)/ProgramListBox_58735432.o \
@@ -188,9 +189,14 @@ $(JUCE_OBJDIR)/EngineOpl_d5a0e5ea.o: ../../Source/EngineOpl.cpp
 	@echo "Compiling EngineOpl.cpp"
 	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_SHARED_CODE) $(JUCE_CFLAGS_SHARED_CODE) -o "$@" -c "$<"
 
-$(JUCE_OBJDIR)/SysexPresetsLibrary_cb273e8.o: ../../Source/SysexPresetsLibrary.cpp
+$(JUCE_OBJDIR)/PresetBowserComponent_cb07e5c9.o: ../../Source/PresetBowserComponent.cpp
 	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
-	@echo "Compiling SysexPresetsLibrary.cpp"
+	@echo "Compiling PresetBowserComponent.cpp"
+	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_SHARED_CODE) $(JUCE_CFLAGS_SHARED_CODE) -o "$@" -c "$<"
+
+$(JUCE_OBJDIR)/PresetsLibrary_ed69d8b0.o: ../../Source/PresetsLibrary.cpp
+	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
+	@echo "Compiling PresetsLibrary.cpp"
 	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_SHARED_CODE) $(JUCE_CFLAGS_SHARED_CODE) -o "$@" -c "$<"
 
 $(JUCE_OBJDIR)/PluginEditor_94d4fb09.o: ../../Source/PluginEditor.cpp

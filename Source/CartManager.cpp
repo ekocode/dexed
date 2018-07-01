@@ -27,16 +27,7 @@
 #include <fstream>
 using namespace ::std;
 
-class SyxFileFilter : public FileFilter {
-public:
-    SyxFileFilter() : FileFilter(".syx") {}
-    bool isFileSuitable(const File &file) const {
-        return file.getFileExtension().toLowerCase() == ".syx" && file.getSize() >= 4096;
-    }
-    bool isDirectorySuitable(const File &file) const {
-        return true;
-    };
-};
+
 
 class FileTreeDrop : public FileTreeComponent {
 public :
@@ -95,12 +86,7 @@ CartManager::CartManager(DexedAudioProcessorEditor *editor) : Component("CartMan
     addAndMakeVisible(cartBrowser);
     
     
-    for(int i=0;i<cartBrowserList->getNumFiles();i++)
-    {
-        DirectoryContentsList::FileInfo infos;
-        cartBrowserList->getFileInfo(i,infos);
-        TRACE("%s",infos.filename.toStdString().c_str());
-    }
+   
     
     
     
@@ -109,7 +95,7 @@ CartManager::CartManager(DexedAudioProcessorEditor *editor) : Component("CartMan
     cartBrowser->setDragAndDropDescription("Sysex Browser");
     cartBrowser->addListener(this);
     
-    presetsLibrary = new SysexPresetsLibrary(mainWindow,cartBrowserList);
+    presetsLibrary = new PresetsLibrary(mainWindow);
     presetsLibrary->setBounds(23, 18, 812, 384);
     //addAndMakeVisible(presetsLibrary);
     addChildComponent(presetsLibrary);

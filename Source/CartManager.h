@@ -25,9 +25,20 @@
 #include "PluginData.h"
 #include "ProgramListBox.h"
 #include "PluginData.h"
-#include "SysexPresetsLibrary.h"
+#include "PresetsLibrary.h"
 
-class SysexPresetsLibrary;
+class PresetsLibrary;
+
+class SyxFileFilter : public FileFilter {
+public:
+	SyxFileFilter() : FileFilter(".syx") {}
+	bool isFileSuitable(const File &file) const {
+		return file.getFileExtension().toLowerCase() == ".syx" && file.getSize() >= 4096;
+	}
+	bool isDirectorySuitable(const File &file) const {
+		return true;
+	};
+};
 
 class CartManager  : public Component, public Button::Listener, public DragAndDropContainer, public FileBrowserListener
     , public ProgramListBoxListener, public KeyListener {
@@ -48,7 +59,7 @@ class CartManager  : public Component, public Button::Listener, public DragAndDr
     FileTreeComponent *cartBrowser;
     TimeSliceThread *timeSliceThread;
     DirectoryContentsList *cartBrowserList;
-    SysexPresetsLibrary *presetsLibrary;
+    PresetsLibrary *presetsLibrary;
 
     
         
