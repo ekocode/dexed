@@ -45,7 +45,7 @@ PresetsLibrary::PresetsLibrary (DexedAudioProcessorEditor *editor)
 
     cartDir = DexedAudioProcessor::dexedCartDir;
     //libraryBrowserList=new DirectoryContentsList(cartDir,true,true);
-    statusText="TEST";
+	
     //TRACE("%s",cartDir.getFileName().toStdString().c_str());
     //[UserPreSize]
     //[/UserPreSize]
@@ -66,6 +66,7 @@ PresetsLibrary::PresetsLibrary (DexedAudioProcessorEditor *editor)
 
 	addAndMakeVisible(libraryPanel = new LibraryPanel());
 	libraryPanel->setBounds(getLocalBounds().removeFromTop(height - toolbarHeight).removeFromRight(width * 3 / 4).removeFromLeft(width / 2));
+	libraryPanel->statusText = "Library Panel";
 
 	addAndMakeVisible(presetEditorPanel = new PresetEditorPanel());
 	presetEditorPanel->setBounds(getLocalBounds().removeFromTop(height - toolbarHeight).removeFromRight(width / 4));
@@ -105,13 +106,7 @@ void PresetsLibrary::paint (Graphics& g)
     g.fillAll (Colour (0xff323e44));
 
 
-    int x = 10, y = 50, width = 812-20 , height = 200;
-    Colour fillColour = Colours::white;
-    //[UserPaintCustomArguments] Customize the painting arguments here..
-    //[/UserPaintCustomArguments]
-    g.setColour (fillColour);
-    g.setFont (Font (15.00f, Font::plain).withTypefaceStyle ("Regular"));
-    g.drawMultiLineText(statusText, x, y, 812-20);
+    
     //[UserPaint] Add your own custom painting code here..
     //[/UserPaint]
 }
@@ -189,6 +184,7 @@ void PresetsLibrary::generateTags()
 	characteristicTags.add(Tag("Soft"));
 
 	bankTags.add(Tag("Default"));
+
 }
 //[MiscUserCode] You can add your own definitions of your custom methods or any other code here...
 //[/MiscUserCode]
@@ -202,13 +198,14 @@ void PresetsLibrary::scan(File dir)
 	
 
 	//generateTags();
-    statusText="Scanning...";
-    this->repaint();
+	libraryPanel->statusText ="Scanning: "+ libraryBrowserList->getDirectory().getFileName();
+	libraryPanel->repaint();
+	this->repaint();
     String result="";
     DirectoryContentsList::FileInfo fileInfos;
     int n = libraryBrowserList->getNumFiles();
-    //result += "Files count: "+String(n)+newLine;
-
+    result += "Files count of "+ libraryBrowserList->getDirectory().getFileName() +": "+String(n)+newLine;
+	
     for (int i=0;i<n; i++) {
 		libraryBrowserList->getFileInfo(i, fileInfos);
         if (!fileInfos.isDirectory)
@@ -244,6 +241,7 @@ void PresetsLibrary::scan(File dir)
                 result += libraryBrowserList->getDirectory().getFullPathName()+"|"+fileInfos.filename+" | "+programNames.getReference(j)+newLine;
                 uint8_t unpackPgm[161];
                 cart.unpackProgram(unpackPgm,j);
+				cart.getVoiceSysex();
 
                 //result += String((char *)unpackPgm)+newLine;
             }
@@ -253,15 +251,12 @@ void PresetsLibrary::scan(File dir)
 		delete libraryBrowserList;
 
     }
-    statusText = result;
-
-
-
-
-    this->repaint();
-
+    libraryPanel->statusText = result;
+	libraryPanel->repaint();
+	this->repaint();
 
 }
+
 //==============================================================================
 #if 0
 /*  -- Projucer information section --

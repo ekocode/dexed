@@ -91,7 +91,8 @@ struct PresetEditorPanel : public Component
 };
 struct LibraryPanel : public Component
 {
-
+public:
+	String statusText;
 	LibraryPanel()
 	{
 
@@ -99,7 +100,13 @@ struct LibraryPanel : public Component
 
 	void paint(Graphics& g) override
 	{
+
 		g.fillAll(Colours::darkgrey);
+		int x = 10, y = 50, width = getLocalBounds().getWidth() - 20, height = getLocalBounds().getHeight();
+		Colour fillColour = Colours::white;
+		g.setColour(fillColour);
+		g.setFont(Font(15.00f, Font::plain).withTypefaceStyle("Regular"));
+		g.drawMultiLineText(statusText, x, y, 812 - 20);
 	}
 
 };
@@ -149,7 +156,7 @@ class PresetsLibrary  : public Component, public Button::Listener
 	PresetEditorPanel *presetEditorPanel;
 	LibraryButtonsPanel *libraryButtonPanel;
 
-    String statusText;
+    
 	Array<Preset> libraryDatas;
 	Array<Tag> typeTags; //instrument: bass,piano,... (one per preset)
 	Array<Tag> bankTags; //factory,rom1,... (one per preset)
@@ -173,6 +180,7 @@ public:
 	void generateTags();
     
     void scan(File dir);
+	
 	void addPreset();
     
 
