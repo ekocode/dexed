@@ -29,37 +29,37 @@
 
 
 
-class Tag
-{
-	//name of the tag
-	String name;
-	//unique id of tag
-	int uid;
-public:
-	static int maxid;
+//class Tag
+//{
+//	//name of the tag
+//	String name;
+//	//unique id of tag
+//	int uid;
+//public:
+//	static int maxid;
+//
+//	Tag(String name)
+//	{
+//		this->name = name;
+//		uid = maxid;
+//		maxid++;
+//
+//	};
+//};
 
-	Tag(String name)
-	{
-		this->name = name;
-		uid = maxid;
-		maxid++;
 
-	};
-};
-
-
-struct Preset
-{
-	String Name;
-	uint8_t content[161];
-	int typeTag;
-	int bankTag;
-	Array<int> characteristicTags;
-	String Author;
-	String Comment;
-	bool favorite;
-
-};
+//struct Preset
+//{
+//	String Name;
+//	uint8_t content[161];
+//	int typeTag;
+//	int bankTag;
+//	Array<int> characteristicTags;
+//	String Author;
+//	String Comment;
+//	bool favorite;
+//
+//};
 
 struct TagsPanel : public Component
 {
@@ -161,11 +161,11 @@ class PresetsLibrary  : public Component, public Button::Listener
     TextEditor *statusText;
     #endif
     
-	Array<Preset> libraryDatas;
-	Array<Tag> typeTags; //instrument: bass,piano,... (one per preset)
-	Array<Tag> bankTags; //factory,rom1,... (one per preset)
-	Array<Tag> characteristicTags;//styles: dark,bright,... (multiple)
-    
+	XmlElement* xmlPresetLibrary;
+	//Array<Tag> typeTags; //instrument: bass,piano,... (one per preset)
+	//Array<Tag> bankTags; //factory,rom1,... (one per preset)
+	//Array<Tag> characteristicTags;//styles: dark,bright,... (multiple)
+  
     String statusMessage;
 	
     
@@ -183,7 +183,11 @@ public:
     void resized() override;
     void buttonClicked (Button* buttonThatWasClicked) override;
 
-	void generateTags();
+	void generateDefaultXml();
+	XmlElement* makeXmlPreset(String name, uint8_t content[161], int typeTag=-1, int bankTag=-1, Array<int> characteristicTags = Array<int>(), String author="", String comment="", bool favorite=false);
+	XmlElement* makeXmlTag(String name);
+
+
 	int loadLibrary();
 	int saveLibrary();
     

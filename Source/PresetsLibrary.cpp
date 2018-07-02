@@ -27,8 +27,7 @@
 //[MiscUserDefs] You can add your own user definitions and misc code here...
 //[/MiscUserDefs]
 
-//
-int Tag::maxid = 0;
+
 
 
 //==============================================================================
@@ -37,6 +36,7 @@ PresetsLibrary::PresetsLibrary (DexedAudioProcessorEditor *editor)
     //[Constructor_pre] You can add your own custom stuff here..
     //[/Constructor_pre]
     mainWindow = editor;
+	xmlPresetLibrary = new XmlElement("DEXEDLIBRARY");;
 	
 #ifdef DEBUG
     statusWindow = new DocumentWindow("Status",Colours::darkgrey,0);
@@ -92,6 +92,7 @@ PresetsLibrary::PresetsLibrary (DexedAudioProcessorEditor *editor)
 	scanButton->setBounds(2, 2, 100, 30);
 	scanButton->addListener(this);
     //[/Constructor]
+	generateDefaultXml();
 }
 
 PresetsLibrary::~PresetsLibrary()
@@ -104,7 +105,7 @@ PresetsLibrary::~PresetsLibrary()
     delete statusWindow;
     
 #endif
-
+	delete xmlPresetLibrary;
 	delete tagsPanel;
 	delete libraryPanel;
 	delete presetEditorPanel;
@@ -159,49 +160,143 @@ void PresetsLibrary::buttonClicked(juce::Button *buttonThatWasClicked) {
         
         return;
     }
+
+
 }
-void PresetsLibrary::generateTags()
+
+XmlElement* PresetsLibrary::makeXmlPreset(String name, uint8_t content[161]
+										,int typeTag, int bankTag, Array<int> characteristicTags
+										,String author, String comment, bool favorite)
 {
+	XmlElement* element= new XmlElement("PRESET");
+	element->setAttribute("name", name);
+	element->setAttribute("typeTag", typeTag);
+	element->setAttribute("bankTag", bankTag);
+	String serialized = "";
+	for (size_t i = 0; i < characteristicTags.size(); i++)
+	{
+		if (i != 0)
+		{
+			serialized += " ";
+		}
+		serialized += String(characteristicTags.getReference(i));
+	}
+	element->setAttribute("characteristicTags", serialized);
+	element->setAttribute("author", author);
+	element->setAttribute("comment", comment);
+	element->setAttribute("favorite", favorite);
+
+	int length = (uint8_t)(content[0]);
+	String serialized2 = String::createStringFromData(content, sizeof(161));
+	serialized = "";
+	serialized = String(reinterpret_cast<unsigned char>(content));
+	for (size_t i = 0; i < 161; i++)
+	{
+		TODO
+		//serialized += 	String::createStringFromData(*content[i], 1);
+		//serialized += String(content[i],161);
+	}
+	
+	element->addTextElement(serialized);
+	return element;
+
+}
+
+
+XmlElement* PresetsLibrary::makeXmlTag(String name)
+{
+	XmlElement* element = new XmlElement("TAG");
+	element->setAttribute("name", name);
+	return element;
+
+}
+
+
+void PresetsLibrary::generateDefaultXml()
+{
+	
+	
+	xmlPresetLibrary->setAttribute("majorversion", librayVersionMajor);
+	xmlPresetLibrary->setAttribute("minorversion", libraryVersionMinor);
+
+	XmlElement *xmlTagsList = new XmlElement("TAGS");
+	XmlElement *xmlTagsTypeList = new XmlElement("TYPES");
+	XmlElement *xmlTagsCharacteristicList = new XmlElement("CHARACTERISTIC");
+	XmlElement *xmlTagsBankList = new XmlElement("BANKS");
+
+	xmlTagsList->addChildElement(xmlTagsTypeList);
+	xmlTagsList->addChildElement(xmlTagsCharacteristicList);
+	xmlTagsList->addChildElement(xmlTagsBankList);
 	// Types Tags
-	typeTags.add(Tag("Bass"));
-	typeTags.add(Tag("Brass"));
+	xmlTagsTypeList->addChildElement(makeXmlTag("Bass"));
+	xmlTagsTypeList->addChildElement(makeXmlTag("Brass"));
 
-	typeTags.add(Tag("Key"));
+	xmlTagsTypeList->addChildElement(makeXmlTag("Key"));
 
-	typeTags.add(Tag("Lead"));
+	xmlTagsTypeList->addChildElement(makeXmlTag("Lead"));
 
-	typeTags.add(Tag("Organ"));
+	xmlTagsTypeList->addChildElement(makeXmlTag("Organ"));
 
-	typeTags.add(Tag("Pad"));
-	typeTags.add(Tag("Percussion"));
-	typeTags.add(Tag("Piano"));
+	xmlTagsTypeList->addChildElement(makeXmlTag("Pad"));
+	xmlTagsTypeList->addChildElement(makeXmlTag("Percussion"));
+	xmlTagsTypeList->addChildElement(makeXmlTag("Piano"));
 
-	typeTags.add(Tag("Sequence"));
-	typeTags.add(Tag("SFX"));
-	typeTags.add(Tag("Strings"));
+	xmlTagsTypeList->addChildElement(makeXmlTag("Sequence"));
+	xmlTagsTypeList->addChildElement(makeXmlTag("SFX"));
+	xmlTagsTypeList->addChildElement(makeXmlTag("Strings"));
 
-	typeTags.add(Tag("Template"));
+	xmlTagsTypeList->addChildElement(makeXmlTag("Template"));
 
 	//characteristicTags default
-	characteristicTags.add(Tag("Acid"));
-	characteristicTags.add(Tag("Agressive"));
-	characteristicTags.add(Tag("Ambient"));
-	characteristicTags.add(Tag("Bizare"));
-	characteristicTags.add(Tag("Bright"));
-	characteristicTags.add(Tag("Complex"));
-	characteristicTags.add(Tag("Dark"));
-	characteristicTags.add(Tag("Digital"));
-	characteristicTags.add(Tag("Ensemble"));
-	characteristicTags.add(Tag("Evolving"));
-	characteristicTags.add(Tag("Funky"));
-	characteristicTags.add(Tag("Hard"));
-	characteristicTags.add(Tag("Long"));
-	characteristicTags.add(Tag("Noise"));
-	characteristicTags.add(Tag("Quiet"));
-	characteristicTags.add(Tag("Short"));
-	characteristicTags.add(Tag("Soft"));
+	xmlTagsCharacteristicList->addChildElement(makeXmlTag("Acid"));
+	xmlTagsCharacteristicList->addChildElement(makeXmlTag("Agressive"));
+	xmlTagsCharacteristicList->addChildElement(makeXmlTag("Ambient"));
+	xmlTagsCharacteristicList->addChildElement(makeXmlTag("Bizare"));
+	xmlTagsCharacteristicList->addChildElement(makeXmlTag("Bright"));
+	xmlTagsCharacteristicList->addChildElement(makeXmlTag("Complex"));
+	xmlTagsCharacteristicList->addChildElement(makeXmlTag("Dark"));
+	xmlTagsCharacteristicList->addChildElement(makeXmlTag("Digital"));
+	xmlTagsCharacteristicList->addChildElement(makeXmlTag("Ensemble"));
+	xmlTagsCharacteristicList->addChildElement(makeXmlTag("Evolving"));
+	xmlTagsCharacteristicList->addChildElement(makeXmlTag("Funky"));
+	xmlTagsCharacteristicList->addChildElement(makeXmlTag("Hard"));
+	xmlTagsCharacteristicList->addChildElement(makeXmlTag("Long"));
+	xmlTagsCharacteristicList->addChildElement(makeXmlTag("Noise"));
+	xmlTagsCharacteristicList->addChildElement(makeXmlTag("Quiet"));
+	xmlTagsCharacteristicList->addChildElement(makeXmlTag("Short"));
+	xmlTagsCharacteristicList->addChildElement(makeXmlTag("Soft"));
 
-	bankTags.add(Tag("Default"));
+	XmlElement *xmlPresetsList = new XmlElement("PRESETS");
+	//cartDir.
+	File startupFile = cartDir.getChildFile("Dexed_01.syx");
+	StringArray programNames;
+	Cartridge cart;
+	int rc = cart.load(startupFile);
+	cart.getProgramNames(programNames);
+	String presetName = programNames.getReference(0);
+		//log(libraryBrowserList->getDirectory().getFullPathName()+"|"+fileInfos.filename+" | "+programNames.getReference(j));
+	uint8_t presetDatas[161];
+
+		
+	cart.unpackProgram(presetDatas, 0);
+	xmlPresetsList->addChildElement(makeXmlPreset(presetName, presetDatas));
+
+	//for (int i = 0; i < 10; ++i)
+	//{
+	//	// create an inner element…
+	//	XmlElement* xmlPreset = new XmlElement("PRESET");
+	//	xmlPreset->setAttribute("name", "preset" + String(i));
+	//	xmlPreset->setAttribute("favorite", true);
+	//	// …and add our new element to the parent node
+	//	xmlPresetsList->addChildElement(xmlPreset);
+	//}
+
+	xmlPresetLibrary->addChildElement(xmlTagsList);
+	xmlPresetLibrary->addChildElement(xmlPresetsList);
+	// now we can turn the whole thing into a text document…
+	String myXmlDoc = xmlPresetLibrary->createDocument(String());
+	log("_CLEAR");
+	log(myXmlDoc);
 
 }
 //[MiscUserCode] You can add your own definitions of your custom methods or any other code here...
@@ -226,7 +321,7 @@ void PresetsLibrary::scan(File dir)
 	this->repaint();
     while(libraryBrowserList->isStillLoading())
     {
-        //wait (500);
+        //wait
     }
     
     
@@ -306,27 +401,8 @@ int PresetsLibrary::loadLibrary()
 
 int PresetsLibrary::saveLibrary()
 {
-	XmlElement xmlPresetLibrary("DEXEDLIBRARY");
-	xmlPresetLibrary.setAttribute("majorversion", librayVersionMajor);
-	xmlPresetLibrary.setAttribute("minorversion", libraryVersionMinor);
+	generateDefaultXml();
 
-	XmlElement *xmlTagsList = new XmlElement("TAGS");
-	XmlElement *xmlPresetsList = new XmlElement("PRESETS");
-	for (int i = 0; i < 10; ++i)
-	{
-		// create an inner element…
-		XmlElement* xmlPreset = new XmlElement("PRESET");
-		xmlPreset->setAttribute("name", "preset"+String(i));
-		xmlPreset->setAttribute("favorite", true);
-		// …and add our new element to the parent node
-		xmlPresetsList->addChildElement(xmlPreset);
-	}
-	xmlPresetLibrary.addChildElement(xmlTagsList);
-	xmlPresetLibrary.addChildElement(xmlPresetsList);
-	// now we can turn the whole thing into a text document…
-	String myXmlDoc = xmlPresetLibrary.createDocument(String());
-	log("_CLEAR");
-	log(myXmlDoc);
 	return 1;
 }
 
@@ -342,6 +418,8 @@ void PresetsLibrary::log(juce::String message)
 	}
 #endif
 }
+
+
 
 //==============================================================================
 #if 0
