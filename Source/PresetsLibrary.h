@@ -92,7 +92,7 @@ struct PresetEditorPanel : public Component
 struct LibraryPanel : public Component
 {
 public:
-	String statusText;
+	//String statusText;
 	LibraryPanel()
 	{
 
@@ -102,11 +102,11 @@ public:
 	{
 
 		g.fillAll(Colours::darkgrey);
-		int x = 10, y = 50, width = getLocalBounds().getWidth() - 20, height = getLocalBounds().getHeight();
-		Colour fillColour = Colours::white;
-		g.setColour(fillColour);
-		g.setFont(Font(15.00f, Font::plain).withTypefaceStyle("Regular"));
-		g.drawMultiLineText(statusText, x, y, 812 - 20);
+//        int x = 10, y = 50, width = getLocalBounds().getWidth() - 20, height = getLocalBounds().getHeight();
+//        Colour fillColour = Colours::white;
+//        g.setColour(fillColour);
+//        g.setFont(Font(15.00f, Font::plain).withTypefaceStyle("Regular"));
+//        g.drawMultiLineText(statusText, x, y, 812 - 20);
 	}
 
 };
@@ -147,20 +147,26 @@ class PresetsLibrary  : public Component, public Button::Listener
 	const int libraryVersionMinor=0;
     ScopedPointer<TextButton> scanButton;
 
-	ScopedPointer<FileFilter> syxFileFilter;
-	TimeSliceThread *timeSliceThread;
-    DirectoryContentsList *libraryBrowserList;
+//    ScopedPointer<FileFilter> syxFileFilter;
+//    TimeSliceThread *timeSliceThread;
+//    DirectoryContentsList *libraryBrowserList;
 
 	TagsPanel *tagsPanel;
 	LibraryPanel *libraryPanel;
 	PresetEditorPanel *presetEditorPanel;
 	LibraryButtonsPanel *libraryButtonPanel;
-
+    
+    #ifdef DEBUG
+    DocumentWindow *statusWindow;
+    TextEditor *statusText;
+    #endif
     
 	Array<Preset> libraryDatas;
 	Array<Tag> typeTags; //instrument: bass,piano,... (one per preset)
 	Array<Tag> bankTags; //factory,rom1,... (one per preset)
 	Array<Tag> characteristicTags;//styles: dark,bright,... (multiple)
+    
+    String statusMessage;
 	
     
 public:
@@ -181,7 +187,9 @@ public:
     
     void scan(File dir);
 	
-	void addPreset();
+	int importCart(File file);
+    
+    void displayStatusMessage(String message);
     
 
 

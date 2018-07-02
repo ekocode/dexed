@@ -33,7 +33,7 @@
     Describe your class and how it works here!
                                                                     //[/Comments]
 */
-class PresetBowserComponent  : public Component : public TableListBoxModel
+class PresetBowserComponent  : public Component , public TableListBoxModel
 {
 public:
     //==============================================================================

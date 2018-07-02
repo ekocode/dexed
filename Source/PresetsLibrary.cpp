@@ -38,11 +38,22 @@ PresetsLibrary::PresetsLibrary (DexedAudioProcessorEditor *editor)
     //[/Constructor_pre]
     mainWindow = editor;
 	
-	
-	syxFileFilter = new SyxFileFilter();
-	timeSliceThread = new TimeSliceThread("Cartridge Directory Scanner");
-	
-
+#ifdef DEBUG
+    statusWindow = new DocumentWindow("Status",Colours::darkgrey,0);
+    
+    statusWindow->setBounds(0,0,450,500);
+    statusWindow->setVisible(true);
+    statusText = new TextEditor();
+    statusText->setMultiLine(true);
+    statusText->setBounds(statusWindow->getLocalBounds());
+    statusWindow->setContentOwned(statusText,true);
+    
+    
+    statusText->setTextToShowWhenEmpty("DEBUG STATUS",Colours::grey);
+    statusText->setVisible(true);
+#endif
+    
+    
     cartDir = DexedAudioProcessor::dexedCartDir;
     //libraryBrowserList=new DirectoryContentsList(cartDir,true,true);
 	
@@ -66,7 +77,7 @@ PresetsLibrary::PresetsLibrary (DexedAudioProcessorEditor *editor)
 
 	addAndMakeVisible(libraryPanel = new LibraryPanel());
 	libraryPanel->setBounds(getLocalBounds().removeFromTop(height - toolbarHeight).removeFromRight(width * 3 / 4).removeFromLeft(width / 2));
-	libraryPanel->statusText = "Library Panel";
+	
 
 	addAndMakeVisible(presetEditorPanel = new PresetEditorPanel());
 	presetEditorPanel->setBounds(getLocalBounds().removeFromTop(height - toolbarHeight).removeFromRight(width / 4));
@@ -86,6 +97,12 @@ PresetsLibrary::~PresetsLibrary()
 {
     //[Destructor_pre]. You can add your own custom destruction code here..
     //[/Destructor_pre]
+#ifdef DEBUG
+    //statusWindow->deleteAllChildren();
+    delete statusText;
+    delete statusWindow;
+    
+#endif
 
 	delete tagsPanel;
 	delete libraryPanel;
@@ -123,19 +140,18 @@ void PresetsLibrary::resized()
 
 void PresetsLibrary::buttonClicked(juce::Button *buttonThatWasClicked) {
 
-
+    
     if ( buttonThatWasClicked == scanButton ) {
 
+        auto path = cartDir.getChildFile (Time::getCurrentTime().toString (true, true));
 		FileChooser myChooser("Please select the directory you want to scan",
-			cartDir
+			File::nonexistent
 			//File::getSpecialLocation(File::userHomeDirectory),
 			,"",true
 			);
 		if (myChooser.browseForDirectory())
 		{
 			File scanDir(myChooser.getResult());
-			
-
 			scan(scanDir);
 		}
         
@@ -191,6 +207,10 @@ void PresetsLibrary::generateTags()
 
 void PresetsLibrary::scan(File dir)
 {
+    
+    SyxFileFilter *syxFileFilter = new SyxFileFilter();
+    TimeSliceThread *timeSliceThread = new TimeSliceThread("Cartridge Directory Scanner");
+    DirectoryContentsList *libraryBrowserList;
     //cartDir.
 	timeSliceThread->startThread();
 	libraryBrowserList = new DirectoryContentsList(syxFileFilter, *timeSliceThread);
@@ -198,13 +218,20 @@ void PresetsLibrary::scan(File dir)
 	
 
 	//generateTags();
-	libraryPanel->statusText ="Scanning: "+ libraryBrowserList->getDirectory().getFileName();
+
+	displayStatusMessage("Scanning: "+ libraryBrowserList->getDirectory().getFileName());
 	libraryPanel->repaint();
 	this->repaint();
-    String result="";
+    while(libraryBrowserList->isStillLoading())
+    {
+        //wait (500);
+    }
+    
+    
     DirectoryContentsList::FileInfo fileInfos;
     int n = libraryBrowserList->getNumFiles();
-    result += "Files count of "+ libraryBrowserList->getDirectory().getFileName() +": "+String(n)+newLine;
+    
+    displayStatusMessage("Files count of "+ libraryBrowserList->getDirectory().getFileName() +": "+String(n));
 	
     for (int i=0;i<n; i++) {
 		libraryBrowserList->getFileInfo(i, fileInfos);
@@ -213,48 +240,61 @@ void PresetsLibrary::scan(File dir)
             //sysex file
 
             File file = libraryBrowserList->getFile(i);
+            importCart(file);
 
-
-            Cartridge cart;
-            int rc = cart.load(file);
-            if ( rc < 0 ) {
-                AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
-                                                  "Error",
-                                                  "Unable to open: " + file.getFullPathName());
-                return;
-            }
-            if ( rc != 0 ) {
-                rc = AlertWindow::showOkCancelBox(AlertWindow::QuestionIcon, "Unable to find DX7 sysex cartridge in file",
-                                                  "This sysex file is not for the DX7 or it is corrupted. "
-                                                  "Do you still want to load this file as random data ?");
-                if ( rc == 0 )
-                    return;
-            }
-
-            StringArray programNames;
-            cart.getProgramNames(programNames);
-
-            for(int j=0; j<programNames.size(); j++)
-            {
-
-
-                result += libraryBrowserList->getDirectory().getFullPathName()+"|"+fileInfos.filename+" | "+programNames.getReference(j)+newLine;
-                uint8_t unpackPgm[161];
-                cart.unpackProgram(unpackPgm,j);
-				cart.getVoiceSysex();
-
-                //result += String((char *)unpackPgm)+newLine;
-            }
+            
 
         }
-		timeSliceThread->stopThread(500);
-		delete libraryBrowserList;
+		
 
     }
-    libraryPanel->statusText = result;
+    
 	libraryPanel->repaint();
 	this->repaint();
+    
+    timeSliceThread->stopThread(500);
+    delete libraryBrowserList;
+    delete syxFileFilter;
+    delete timeSliceThread;
 
+}
+
+int PresetsLibrary::importCart(File file)
+{
+    Cartridge cart;
+    int rc = cart.load(file);
+    if ( rc < 0 ) {
+        AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
+                                          "Error",
+                                          "Unable to open: " + file.getFullPathName());
+        return rc;
+    }
+    if ( rc != 0 ) {
+        rc = AlertWindow::showOkCancelBox(AlertWindow::QuestionIcon, "Unable to find DX7 sysex cartridge in file",
+                                          "This sysex file is not for the DX7 or it is corrupted. "
+                                          "Do you still want to load this file as random data ?");
+        if ( rc == 0 )
+            return rc;
+    }
+    
+    StringArray programNames;
+    cart.getProgramNames(programNames);
+    //result += "Reading folder...";
+    
+    for(int j=0; j<programNames.size(); j++)
+    {
+        
+        
+        //result += libraryBrowserList->getDirectory().getFullPathName()+"|"+fileInfos.filename+" | "+programNames.getReference(j)+newLine;
+        uint8_t unpackPgm[161];
+        cart.unpackProgram(unpackPgm,j);
+        cart.getVoiceSysex();
+        
+        //result += String((char *)unpackPgm)+newLine;
+    }
+    
+    return rc;
+    
 }
 
 //==============================================================================
@@ -280,3 +320,17 @@ END_JUCER_METADATA
 
 //[EndFile] You can add extra defines here...
 //[/EndFile]
+
+
+void PresetsLibrary::displayStatusMessage(juce::String message)
+{
+#ifdef DEBUG
+    if (message == "_CLEAR")
+    {
+        statusText->clear();
+    }
+    else{
+        statusText->setText(statusText->getText()+newLine+message);
+    }
+#endif
+}
