@@ -51,7 +51,7 @@ public:
 struct Preset
 {
 	String Name;
-	uint8_t unpackPgm[161];
+	uint8_t content[161];
 	int typeTag;
 	int bankTag;
 	Array<int> characteristicTags;
@@ -184,12 +184,14 @@ public:
     void buttonClicked (Button* buttonThatWasClicked) override;
 
 	void generateTags();
+	int loadLibrary();
+	int saveLibrary();
     
     void scan(File dir);
 	
 	int importCart(File file);
     
-    void displayStatusMessage(String message);
+    void log(String message);
     
 
 

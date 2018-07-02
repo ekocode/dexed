@@ -45,6 +45,7 @@ PresetsLibrary::PresetsLibrary (DexedAudioProcessorEditor *editor)
     statusWindow->setVisible(true);
     statusText = new TextEditor();
     statusText->setMultiLine(true);
+	statusText->setReadOnly(true);
     statusText->setBounds(statusWindow->getLocalBounds());
     statusWindow->setContentOwned(statusText,true);
     
@@ -143,16 +144,17 @@ void PresetsLibrary::buttonClicked(juce::Button *buttonThatWasClicked) {
     
     if ( buttonThatWasClicked == scanButton ) {
 
+		saveLibrary();
         auto path = cartDir.getChildFile (Time::getCurrentTime().toString (true, true));
 		FileChooser myChooser("Please select the directory you want to scan",
-			File::nonexistent
+			cartDir.getChildFile(Time::getCurrentTime().toString(true, true))
 			//File::getSpecialLocation(File::userHomeDirectory),
 			,"",true
 			);
 		if (myChooser.browseForDirectory())
 		{
-			File scanDir(myChooser.getResult());
-			scan(scanDir);
+			//File scanDir(myChooser.getResult());
+			scan(myChooser.getResult());
 		}
         
         return;
@@ -219,7 +221,7 @@ void PresetsLibrary::scan(File dir)
 
 	//generateTags();
 
-	displayStatusMessage("Scanning: "+ libraryBrowserList->getDirectory().getFileName());
+	log("Scanning: "+ libraryBrowserList->getDirectory().getFileName());
 	libraryPanel->repaint();
 	this->repaint();
     while(libraryBrowserList->isStillLoading())
@@ -231,7 +233,7 @@ void PresetsLibrary::scan(File dir)
     DirectoryContentsList::FileInfo fileInfos;
     int n = libraryBrowserList->getNumFiles();
     
-    displayStatusMessage("Files count of "+ libraryBrowserList->getDirectory().getFileName() +": "+String(n));
+    log("Files count of "+ libraryBrowserList->getDirectory().getFileName() +": "+String(n));
 	
     for (int i=0;i<n; i++) {
 		libraryBrowserList->getFileInfo(i, fileInfos);
@@ -279,13 +281,13 @@ int PresetsLibrary::importCart(File file)
     
     StringArray programNames;
     cart.getProgramNames(programNames);
-    //result += "Reading folder...";
+    log( "Reading folder...");
     
     for(int j=0; j<programNames.size(); j++)
     {
         
-        
-        //result += libraryBrowserList->getDirectory().getFullPathName()+"|"+fileInfos.filename+" | "+programNames.getReference(j)+newLine;
+		log(programNames.getReference(j));
+        //log(libraryBrowserList->getDirectory().getFullPathName()+"|"+fileInfos.filename+" | "+programNames.getReference(j));
         uint8_t unpackPgm[161];
         cart.unpackProgram(unpackPgm,j);
         cart.getVoiceSysex();
@@ -295,6 +297,50 @@ int PresetsLibrary::importCart(File file)
     
     return rc;
     
+}
+
+int PresetsLibrary::loadLibrary()
+{
+	return 1;
+}
+
+int PresetsLibrary::saveLibrary()
+{
+	XmlElement xmlPresetLibrary("DEXEDLIBRARY");
+	xmlPresetLibrary.setAttribute("majorversion", librayVersionMajor);
+	xmlPresetLibrary.setAttribute("minorversion", libraryVersionMinor);
+
+	XmlElement *xmlTagsList = new XmlElement("TAGS");
+	XmlElement *xmlPresetsList = new XmlElement("PRESETS");
+	for (int i = 0; i < 10; ++i)
+	{
+		// create an inner element…
+		XmlElement* xmlPreset = new XmlElement("PRESET");
+		xmlPreset->setAttribute("name", "preset"+String(i));
+		xmlPreset->setAttribute("favorite", true);
+		// …and add our new element to the parent node
+		xmlPresetsList->addChildElement(xmlPreset);
+	}
+	xmlPresetLibrary.addChildElement(xmlTagsList);
+	xmlPresetLibrary.addChildElement(xmlPresetsList);
+	// now we can turn the whole thing into a text document…
+	String myXmlDoc = xmlPresetLibrary.createDocument(String());
+	log("_CLEAR");
+	log(myXmlDoc);
+	return 1;
+}
+
+void PresetsLibrary::log(juce::String message)
+{
+#ifdef DEBUG
+	if (message == "_CLEAR")
+	{
+		statusText->clear();
+	}
+	else {
+		statusText->setText(statusText->getText() + newLine + message);
+	}
+#endif
 }
 
 //==============================================================================
@@ -322,15 +368,4 @@ END_JUCER_METADATA
 //[/EndFile]
 
 
-void PresetsLibrary::displayStatusMessage(juce::String message)
-{
-#ifdef DEBUG
-    if (message == "_CLEAR")
-    {
-        statusText->clear();
-    }
-    else{
-        statusText->setText(statusText->getText()+newLine+message);
-    }
-#endif
-}
+
