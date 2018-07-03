@@ -173,7 +173,7 @@ XmlElement* PresetsLibrary::makeXmlPreset(String name, uint8_t content[161]
 	element->setAttribute("typeTag", typeTag);
 	element->setAttribute("bankTag", bankTag);
 	String serialized = "";
-	for (size_t i = 0; i < characteristicTags.size(); i++)
+	for (int i = 0; i < characteristicTags.size(); i++)
 	{
 		if (i != 0)
 		{
@@ -186,16 +186,39 @@ XmlElement* PresetsLibrary::makeXmlPreset(String name, uint8_t content[161]
 	element->setAttribute("comment", comment);
 	element->setAttribute("favorite", favorite);
 
-	int length = (uint8_t)(content[0]);
-	String serialized2 = String::createStringFromData(content, sizeof(161));
+	//int length = (uint8_t)(content[0]);
+    
+	//String serialized2 = String::createStringFromData(content, sizeof(161));
 	serialized = "";
-	serialized = String(reinterpret_cast<unsigned char>(content));
+	//serialized = String(reinterpret_cast<unsigned char>(content));
 	for (size_t i = 0; i < 161; i++)
 	{
-		TODO
+		//TODO
 		//serialized += 	String::createStringFromData(*content[i], 1);
-		//serialized += String(content[i],161);
+        //serialized += String(i)+":"+String(content[i])+"[";
+        
+        //serialized += String::formatted("%c", content[i]);
+        //serialized += reinterpret_cast<char>content[i];
+        //String b64 = Base64::toBase64((unsigned char const*)&content[i], sizeof(content[i]));
+        //ValueTree data = ValueTree::readFromData((unsigned char const*)&content[i], sizeof(content[i]));
+//        if(int(content[i])>127)
+//        {
+//            log(">127");
+//        }
+       //serialized += String::formatted("%c", content[i]);
+        //serialized += data.toXmlString();
+        
+        //serialized += " ";
+        
 	}
+    log("#######################");
+    log(serialized);
+    log("#######################");
+    char const *b = reinterpret_cast< char const * >(content);
+    log(String(b));
+    log("#######################");
+    
+    
 	
 	element->addTextElement(serialized);
 	return element;
@@ -295,8 +318,8 @@ void PresetsLibrary::generateDefaultXml()
 	xmlPresetLibrary->addChildElement(xmlPresetsList);
 	// now we can turn the whole thing into a text document…
 	String myXmlDoc = xmlPresetLibrary->createDocument(String());
-	log("_CLEAR");
-	log(myXmlDoc);
+	//log("_CLEAR");
+	//log(myXmlDoc);
 
 }
 //[MiscUserCode] You can add your own definitions of your custom methods or any other code here...

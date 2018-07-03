@@ -195,7 +195,7 @@ public:
 	
 	int importCart(File file);
     
-    void log(String message);
+    void log(String message="");
     
 
 
