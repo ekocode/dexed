@@ -164,7 +164,7 @@ void PresetsLibrary::buttonClicked(juce::Button *buttonThatWasClicked) {
 
 }
 
-XmlElement* PresetsLibrary::makeXmlPreset(String name, uint8_t content[161]
+XmlElement* PresetsLibrary::makeXmlPreset(String name, uint8_t content[PROGRAM_LENGTH]
 										,int typeTag, int bankTag, Array<int> characteristicTags
 										,String author, String comment, bool favorite)
 {
@@ -184,43 +184,16 @@ XmlElement* PresetsLibrary::makeXmlPreset(String name, uint8_t content[161]
 	element->setAttribute("characteristicTags", serialized);
 	element->setAttribute("author", author);
 	element->setAttribute("comment", comment);
-	element->setAttribute("favorite", favorite);
-
-	//int length = (uint8_t)(content[0]);
-    
-	//String serialized2 = String::createStringFromData(content, sizeof(161));
-	serialized = "";
-	//serialized = String(reinterpret_cast<unsigned char>(content));
-	for (size_t i = 0; i < 161; i++)
-	{
-		//TODO
-		//serialized += 	String::createStringFromData(*content[i], 1);
-        //serialized += String(i)+":"+String(content[i])+"[";
-        
-        //serialized += String::formatted("%c", content[i]);
-        //serialized += reinterpret_cast<char>content[i];
-        //String b64 = Base64::toBase64((unsigned char const*)&content[i], sizeof(content[i]));
-        //ValueTree data = ValueTree::readFromData((unsigned char const*)&content[i], sizeof(content[i]));
-//        if(int(content[i])>127)
-//        {
-//            log(">127");
-//        }
-       //serialized += String::formatted("%c", content[i]);
-        //serialized += data.toXmlString();
-        
-        //serialized += " ";
-        
-	}
-    log("#######################");
-    log(serialized);
-    log("#######################");
-    char const *b = reinterpret_cast< char const * >(content);
-    log(String(b));
-    log("#######################");
-    
+	element->setAttribute("favorite", favorite);    
     
 	
-	element->addTextElement(serialized);
+	element->addTextElement(MemoryBlock(content, PROGRAM_LENGTH).toBase64Encoding());
+
+	/*uint8_t result[PROGRAM_LENGTH];
+	MemoryBlock buffer = MemoryBlock(PROGRAM_LENGTH);
+	buffer.fromBase64Encoding(element->getAllSubText());
+	buffer.copyTo(result,0, PROGRAM_LENGTH);*/
+	
 	return element;
 
 }
@@ -298,7 +271,7 @@ void PresetsLibrary::generateDefaultXml()
 	cart.getProgramNames(programNames);
 	String presetName = programNames.getReference(0);
 		//log(libraryBrowserList->getDirectory().getFullPathName()+"|"+fileInfos.filename+" | "+programNames.getReference(j));
-	uint8_t presetDatas[161];
+	uint8_t presetDatas[PROGRAM_LENGTH];
 
 		
 	cart.unpackProgram(presetDatas, 0);
@@ -317,9 +290,17 @@ void PresetsLibrary::generateDefaultXml()
 	xmlPresetLibrary->addChildElement(xmlTagsList);
 	xmlPresetLibrary->addChildElement(xmlPresetsList);
 	// now we can turn the whole thing into a text document…
-	String myXmlDoc = xmlPresetLibrary->createDocument(String());
+	String libraryXmlDoc = xmlPresetLibrary->createDocument(String());
+
+	File libraryFile = DexedAudioProcessor::dexedAppDir.getChildFile(libraryFilename);
+	libraryFile.create();
+	libraryFile.appendText(libraryXmlDoc);
+	//if (!saveFile.existsAsFile())
+	//	return;
+
+	
 	//log("_CLEAR");
-	//log(myXmlDoc);
+	log(libraryXmlDoc);
 
 }
 //[MiscUserCode] You can add your own definitions of your custom methods or any other code here...
@@ -406,7 +387,7 @@ int PresetsLibrary::importCart(File file)
         
 		log(programNames.getReference(j));
         //log(libraryBrowserList->getDirectory().getFullPathName()+"|"+fileInfos.filename+" | "+programNames.getReference(j));
-        uint8_t unpackPgm[161];
+        uint8_t unpackPgm[PROGRAM_LENGTH];
         cart.unpackProgram(unpackPgm,j);
         cart.getVoiceSysex();
         

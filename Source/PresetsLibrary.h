@@ -27,7 +27,7 @@
 #include "CartManager.h"
 //[/Headers]
 
-
+#define PROGRAM_LENGTH 161
 
 //class Tag
 //{
@@ -145,6 +145,7 @@ class PresetsLibrary  : public Component, public Button::Listener
     File cartDir;
 	const int librayVersionMajor=1;
 	const int libraryVersionMinor=0;
+	const String libraryFilename = "Dexed.presets.xml";
     ScopedPointer<TextButton> scanButton;
 
 //    ScopedPointer<FileFilter> syxFileFilter;
@@ -184,7 +185,7 @@ public:
     void buttonClicked (Button* buttonThatWasClicked) override;
 
 	void generateDefaultXml();
-	XmlElement* makeXmlPreset(String name, uint8_t content[161], int typeTag=-1, int bankTag=-1, Array<int> characteristicTags = Array<int>(), String author="", String comment="", bool favorite=false);
+	XmlElement* makeXmlPreset(String name, uint8_t content[PROGRAM_LENGTH], int typeTag=-1, int bankTag=-1, Array<int> characteristicTags = Array<int>(), String author="", String comment="", bool favorite=false);
 	XmlElement* makeXmlTag(String name);
 
 
