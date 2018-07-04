@@ -143,6 +143,7 @@ class PresetsLibrary  : public Component, public Button::Listener
 
 
     File cartDir;
+	File libraryFile;
 	const int librayVersionMajor=1;
 	const int libraryVersionMinor=0;
 	const String libraryFilename = "Dexed.presets.xml";
@@ -185,8 +186,10 @@ public:
     void buttonClicked (Button* buttonThatWasClicked) override;
 
 	void generateDefaultXml();
-	XmlElement* makeXmlPreset(String name, uint8_t content[PROGRAM_LENGTH], int typeTag=-1, int bankTag=-1, Array<int> characteristicTags = Array<int>(), String author="", String comment="", bool favorite=false);
-	XmlElement* makeXmlTag(String name);
+	XmlElement* makeXmlPreset(String name, uint8_t content[PROGRAM_LENGTH]
+							, int typeTag=-1, int bankTag=-1, Array<int> characteristicTags = Array<int>()
+							, String designer ="", String comment="", bool favorite=false, bool readOnly=false);
+	XmlElement* makeXmlTag(String name, bool readOnly = false);
 
 
 	int loadLibrary();

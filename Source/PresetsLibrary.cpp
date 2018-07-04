@@ -36,11 +36,12 @@ PresetsLibrary::PresetsLibrary (DexedAudioProcessorEditor *editor)
     //[Constructor_pre] You can add your own custom stuff here..
     //[/Constructor_pre]
     mainWindow = editor;
-	xmlPresetLibrary = new XmlElement("DEXEDLIBRARY");;
+	xmlPresetLibrary = new XmlElement("DEXEDLIBRARY");
+	cartDir = DexedAudioProcessor::dexedCartDir;
+	libraryFile = DexedAudioProcessor::dexedAppDir.getChildFile(libraryFilename);
 	
 #ifdef DEBUG
-    statusWindow = new DocumentWindow("Status",Colours::darkgrey,0);
-    
+    statusWindow = new DocumentWindow("Status",Colours::darkgrey,0);    
     statusWindow->setBounds(0,0,450,500);
     statusWindow->setVisible(true);
     statusText = new TextEditor();
@@ -48,51 +49,31 @@ PresetsLibrary::PresetsLibrary (DexedAudioProcessorEditor *editor)
 	statusText->setReadOnly(true);
     statusText->setBounds(statusWindow->getLocalBounds());
     statusWindow->setContentOwned(statusText,true);
-    
-    
     statusText->setTextToShowWhenEmpty("DEBUG STATUS",Colours::grey);
     statusText->setVisible(true);
 #endif
     
     
-    cartDir = DexedAudioProcessor::dexedCartDir;
-    //libraryBrowserList=new DirectoryContentsList(cartDir,true,true);
-	
-    //TRACE("%s",cartDir.getFileName().toStdString().c_str());
-    //[UserPreSize]
-    //[/UserPreSize]
+
 
     setSize (812, 384);
-
-
-    //[Constructor] You can add your own custom stuff here..
-    
-
-
 	int width = getLocalBounds().getWidth();
 	int height = getLocalBounds().getHeight();
 	int toolbarHeight = 34;
 
 	addAndMakeVisible(tagsPanel = new TagsPanel());	
 	tagsPanel->setBounds(getLocalBounds().removeFromTop(height-toolbarHeight).removeFromLeft((width/4)));
-
 	addAndMakeVisible(libraryPanel = new LibraryPanel());
 	libraryPanel->setBounds(getLocalBounds().removeFromTop(height - toolbarHeight).removeFromRight(width * 3 / 4).removeFromLeft(width / 2));
-	
-
 	addAndMakeVisible(presetEditorPanel = new PresetEditorPanel());
 	presetEditorPanel->setBounds(getLocalBounds().removeFromTop(height - toolbarHeight).removeFromRight(width / 4));
-
-
 	addAndMakeVisible(libraryButtonPanel = new LibraryButtonsPanel());
 	libraryButtonPanel->setBounds(getLocalBounds().removeFromBottom(toolbarHeight));
-
-
 	libraryButtonPanel->addAndMakeVisible(scanButton = new TextButton("Import Directory"));
 	scanButton->setBounds(2, 2, 100, 30);
 	scanButton->addListener(this);
     //[/Constructor]
-	generateDefaultXml();
+	//generateDefaultXml();
 }
 
 PresetsLibrary::~PresetsLibrary()
@@ -166,7 +147,7 @@ void PresetsLibrary::buttonClicked(juce::Button *buttonThatWasClicked) {
 
 XmlElement* PresetsLibrary::makeXmlPreset(String name, uint8_t content[PROGRAM_LENGTH]
 										,int typeTag, int bankTag, Array<int> characteristicTags
-										,String author, String comment, bool favorite)
+										,String designer, String comment, bool favorite, bool readOnly)
 {
 	XmlElement* element= new XmlElement("PRESET");
 	element->setAttribute("name", name);
@@ -182,9 +163,10 @@ XmlElement* PresetsLibrary::makeXmlPreset(String name, uint8_t content[PROGRAM_L
 		serialized += String(characteristicTags.getReference(i));
 	}
 	element->setAttribute("characteristicTags", serialized);
-	element->setAttribute("author", author);
+	element->setAttribute("designer", designer);
 	element->setAttribute("comment", comment);
-	element->setAttribute("favorite", favorite);    
+	element->setAttribute("favorite", favorite);   
+	element->setAttribute("readOnly", readOnly);
     
 	
 	element->addTextElement(MemoryBlock(content, PROGRAM_LENGTH).toBase64Encoding());
@@ -199,10 +181,11 @@ XmlElement* PresetsLibrary::makeXmlPreset(String name, uint8_t content[PROGRAM_L
 }
 
 
-XmlElement* PresetsLibrary::makeXmlTag(String name)
+XmlElement* PresetsLibrary::makeXmlTag(String name, bool readOnly)
 {
 	XmlElement* element = new XmlElement("TAG");
 	element->setAttribute("name", name);
+	element->setAttribute("readOnly", readOnly);
 	return element;
 
 }
@@ -224,58 +207,58 @@ void PresetsLibrary::generateDefaultXml()
 	xmlTagsList->addChildElement(xmlTagsCharacteristicList);
 	xmlTagsList->addChildElement(xmlTagsBankList);
 	// Types Tags
-	xmlTagsTypeList->addChildElement(makeXmlTag("Bass"));
-	xmlTagsTypeList->addChildElement(makeXmlTag("Brass"));
-
-	xmlTagsTypeList->addChildElement(makeXmlTag("Key"));
-
-	xmlTagsTypeList->addChildElement(makeXmlTag("Lead"));
-
-	xmlTagsTypeList->addChildElement(makeXmlTag("Organ"));
-
-	xmlTagsTypeList->addChildElement(makeXmlTag("Pad"));
-	xmlTagsTypeList->addChildElement(makeXmlTag("Percussion"));
-	xmlTagsTypeList->addChildElement(makeXmlTag("Piano"));
-
-	xmlTagsTypeList->addChildElement(makeXmlTag("Sequence"));
-	xmlTagsTypeList->addChildElement(makeXmlTag("SFX"));
-	xmlTagsTypeList->addChildElement(makeXmlTag("Strings"));
-
-	xmlTagsTypeList->addChildElement(makeXmlTag("Template"));
-
+	xmlTagsTypeList->addChildElement(makeXmlTag("Bass",true));
+	xmlTagsTypeList->addChildElement(makeXmlTag("Brass",true));
+	xmlTagsTypeList->addChildElement(makeXmlTag("Key",true));
+	xmlTagsTypeList->addChildElement(makeXmlTag("Lead",true));
+	xmlTagsTypeList->addChildElement(makeXmlTag("Organ",true));
+	xmlTagsTypeList->addChildElement(makeXmlTag("Pad",true));
+	xmlTagsTypeList->addChildElement(makeXmlTag("Percussion",true));
+	xmlTagsTypeList->addChildElement(makeXmlTag("Piano",true));
+	xmlTagsTypeList->addChildElement(makeXmlTag("Sequence",true));
+	xmlTagsTypeList->addChildElement(makeXmlTag("SFX",true));
+	xmlTagsTypeList->addChildElement(makeXmlTag("Strings",true));
+	xmlTagsTypeList->addChildElement(makeXmlTag("Template",true));
 	//characteristicTags default
-	xmlTagsCharacteristicList->addChildElement(makeXmlTag("Acid"));
-	xmlTagsCharacteristicList->addChildElement(makeXmlTag("Agressive"));
-	xmlTagsCharacteristicList->addChildElement(makeXmlTag("Ambient"));
-	xmlTagsCharacteristicList->addChildElement(makeXmlTag("Bizare"));
-	xmlTagsCharacteristicList->addChildElement(makeXmlTag("Bright"));
-	xmlTagsCharacteristicList->addChildElement(makeXmlTag("Complex"));
-	xmlTagsCharacteristicList->addChildElement(makeXmlTag("Dark"));
-	xmlTagsCharacteristicList->addChildElement(makeXmlTag("Digital"));
-	xmlTagsCharacteristicList->addChildElement(makeXmlTag("Ensemble"));
-	xmlTagsCharacteristicList->addChildElement(makeXmlTag("Evolving"));
-	xmlTagsCharacteristicList->addChildElement(makeXmlTag("Funky"));
-	xmlTagsCharacteristicList->addChildElement(makeXmlTag("Hard"));
-	xmlTagsCharacteristicList->addChildElement(makeXmlTag("Long"));
-	xmlTagsCharacteristicList->addChildElement(makeXmlTag("Noise"));
-	xmlTagsCharacteristicList->addChildElement(makeXmlTag("Quiet"));
-	xmlTagsCharacteristicList->addChildElement(makeXmlTag("Short"));
-	xmlTagsCharacteristicList->addChildElement(makeXmlTag("Soft"));
+	xmlTagsCharacteristicList->addChildElement(makeXmlTag("Acid",true));
+	xmlTagsCharacteristicList->addChildElement(makeXmlTag("Agressive",true));
+	xmlTagsCharacteristicList->addChildElement(makeXmlTag("Ambient",true));
+	xmlTagsCharacteristicList->addChildElement(makeXmlTag("Bizare",true));
+	xmlTagsCharacteristicList->addChildElement(makeXmlTag("Bright",true));
+	xmlTagsCharacteristicList->addChildElement(makeXmlTag("Complex",true));
+	xmlTagsCharacteristicList->addChildElement(makeXmlTag("Dark",true));
+	xmlTagsCharacteristicList->addChildElement(makeXmlTag("Digital",true));
+	xmlTagsCharacteristicList->addChildElement(makeXmlTag("Ensemble",true));
+	xmlTagsCharacteristicList->addChildElement(makeXmlTag("Evolving",true));
+	xmlTagsCharacteristicList->addChildElement(makeXmlTag("Funky",true));
+	xmlTagsCharacteristicList->addChildElement(makeXmlTag("Hard",true));
+	xmlTagsCharacteristicList->addChildElement(makeXmlTag("Long",true));
+	xmlTagsCharacteristicList->addChildElement(makeXmlTag("Noise",true));
+	xmlTagsCharacteristicList->addChildElement(makeXmlTag("Quiet",true));
+	xmlTagsCharacteristicList->addChildElement(makeXmlTag("Short",true));
+	xmlTagsCharacteristicList->addChildElement(makeXmlTag("Soft",true));
+	//xmlTagsBankList default
+	xmlTagsBankList->addChildElement(makeXmlTag("Factory", true));
 
 	XmlElement *xmlPresetsList = new XmlElement("PRESETS");
-	//cartDir.
+
 	File startupFile = cartDir.getChildFile("Dexed_01.syx");
 	StringArray programNames;
 	Cartridge cart;
 	int rc = cart.load(startupFile);
 	cart.getProgramNames(programNames);
-	String presetName = programNames.getReference(0);
-		//log(libraryBrowserList->getDirectory().getFullPathName()+"|"+fileInfos.filename+" | "+programNames.getReference(j));
+	
 	uint8_t presetDatas[PROGRAM_LENGTH];
 
+	for (size_t i = 0; i < 32; i++)
+	{
+		cart.unpackProgram(presetDatas, i);
+		String presetName = programNames.getReference(i);
+		xmlPresetsList->addChildElement(makeXmlPreset(presetName, presetDatas,-1,0,Array<int>(),"Dexed","Dexed Factory presets",false,true));
+
+	}
 		
-	cart.unpackProgram(presetDatas, 0);
-	xmlPresetsList->addChildElement(makeXmlPreset(presetName, presetDatas));
+	
 
 	//for (int i = 0; i < 10; ++i)
 	//{
@@ -292,7 +275,8 @@ void PresetsLibrary::generateDefaultXml()
 	// now we can turn the whole thing into a text document…
 	String libraryXmlDoc = xmlPresetLibrary->createDocument(String());
 
-	File libraryFile = DexedAudioProcessor::dexedAppDir.getChildFile(libraryFilename);
+	
+	libraryFile.deleteFile();
 	libraryFile.create();
 	libraryFile.appendText(libraryXmlDoc);
 	//if (!saveFile.existsAsFile())
@@ -400,6 +384,7 @@ int PresetsLibrary::importCart(File file)
 
 int PresetsLibrary::loadLibrary()
 {
+
 	return 1;
 }
 
