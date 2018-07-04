@@ -99,8 +99,7 @@ PresetsLibrary::~PresetsLibrary()
 	delete tagsPanel;
 	delete libraryPanel;
 	delete presetEditorPanel;
-	delete libraryButtonPanel;
-	
+	delete libraryButtonPanel;	
 
     //[Destructor]. You can add your own custom destruction code here..
     //[/Destructor]
