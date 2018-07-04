@@ -29,37 +29,6 @@
 
 #define PROGRAM_LENGTH 161
 
-//class Tag
-//{
-//	//name of the tag
-//	String name;
-//	//unique id of tag
-//	int uid;
-//public:
-//	static int maxid;
-//
-//	Tag(String name)
-//	{
-//		this->name = name;
-//		uid = maxid;
-//		maxid++;
-//
-//	};
-//};
-
-
-//struct Preset
-//{
-//	String Name;
-//	uint8_t content[161];
-//	int typeTag;
-//	int bankTag;
-//	Array<int> characteristicTags;
-//	String Author;
-//	String Comment;
-//	bool favorite;
-//
-//};
 
 struct TagsPanel : public Component
 {
@@ -139,19 +108,15 @@ class PresetsLibrary  : public Component, public Button::Listener
 {
     DexedAudioProcessorEditor *mainWindow;
 
-	
-
-
     File cartDir;
 	File libraryFile;
 	const int librayVersionMajor=1;
 	const int libraryVersionMinor=0;
 	const String libraryFilename = "Dexed.presets.xml";
-    ScopedPointer<TextButton> scanButton;
 
-//    ScopedPointer<FileFilter> syxFileFilter;
-//    TimeSliceThread *timeSliceThread;
-//    DirectoryContentsList *libraryBrowserList;
+    ScopedPointer<TextButton> scanButton;
+	ScopedPointer<TextButton> factoryResetButton;
+
 
 	TagsPanel *tagsPanel;
 	LibraryPanel *libraryPanel;
@@ -164,10 +129,6 @@ class PresetsLibrary  : public Component, public Button::Listener
     #endif
     
 	XmlElement* xmlPresetLibrary;
-	//Array<Tag> typeTags; //instrument: bass,piano,... (one per preset)
-	//Array<Tag> bankTags; //factory,rom1,... (one per preset)
-	//Array<Tag> characteristicTags;//styles: dark,bright,... (multiple)
-  
     String statusMessage;
 	
     

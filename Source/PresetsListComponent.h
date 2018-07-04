@@ -33,12 +33,12 @@
     Describe your class and how it works here!
                                                                     //[/Comments]
 */
-class PresetBowserComponent  : public Component , public TableListBoxModel
+class PresetsListComponent  : public Component , public TableListBoxModel
 {
 public:
     //==============================================================================
-    PresetBowserComponent ();
-    ~PresetBowserComponent();
+    PresetsListComponent ();
+    ~PresetsListComponent();
 
     //==============================================================================
     //[UserMethods]     -- You can add your own custom methods in this section.
@@ -57,7 +57,7 @@ private:
 
 
     //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PresetBowserComponent)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PresetsListComponent)
 };
 
 //[EndFile] You can add extra defines here...

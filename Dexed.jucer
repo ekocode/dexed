@@ -52,10 +52,10 @@
         <FILE id="TF7JMc" name="EngineOpl.h" compile="0" resource="0" file="Source/EngineOpl.h"/>
       </GROUP>
       <GROUP id="{998D2187-B355-9C12-0FB2-2D048B83342D}" name="ui">
-        <FILE id="Biy6ym" name="PresetBowserComponent.cpp" compile="1" resource="0"
-              file="Source/PresetBowserComponent.cpp"/>
-        <FILE id="HVR4Yd" name="PresetBowserComponent.h" compile="0" resource="0"
-              file="Source/PresetBowserComponent.h"/>
+        <FILE id="Biy6ym" name="PresetsListComponent.cpp" compile="1" resource="0"
+              file="Source/PresetsListComponent.cpp"/>
+        <FILE id="HVR4Yd" name="PresetsListComponent.h" compile="0" resource="0"
+              file="Source/PresetsListComponent.h"/>
         <FILE id="rqIrS4" name="PresetsLibrary.cpp" compile="1" resource="0"
               file="Source/PresetsLibrary.cpp"/>
         <FILE id="MezZi8" name="PresetsLibrary.h" compile="0" resource="0"

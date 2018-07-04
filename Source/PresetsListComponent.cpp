@@ -20,14 +20,14 @@
 //[Headers] You can add your own extra header files here...
 //[/Headers]
 
-#include "PresetBowserComponent.h"
+#include "PresetsListComponent.h"
 
 
 //[MiscUserDefs] You can add your own user definitions and misc code here...
 //[/MiscUserDefs]
 
 //==============================================================================
-PresetBowserComponent::PresetBowserComponent ()
+PresetsListComponent::PresetsListComponent ()
 {
     //[Constructor_pre] You can add your own custom stuff here..
     //[/Constructor_pre]
@@ -43,7 +43,7 @@ PresetBowserComponent::PresetBowserComponent ()
     //[/Constructor]
 }
 
-PresetBowserComponent::~PresetBowserComponent()
+PresetsListComponent::~PresetsListComponent()
 {
     //[Destructor_pre]. You can add your own custom destruction code here..
     //[/Destructor_pre]
@@ -55,7 +55,7 @@ PresetBowserComponent::~PresetBowserComponent()
 }
 
 //==============================================================================
-void PresetBowserComponent::paint (Graphics& g)
+void PresetsListComponent::paint (Graphics& g)
 {
     //[UserPrePaint] Add your own custom painting code here..
     //[/UserPrePaint]
@@ -66,7 +66,7 @@ void PresetBowserComponent::paint (Graphics& g)
     //[/UserPaint]
 }
 
-void PresetBowserComponent::resized()
+void PresetsListComponent::resized()
 {
     //[UserPreResize] Add your own custom resize code here..
     //[/UserPreResize]
@@ -90,7 +90,7 @@ void PresetBowserComponent::resized()
 
 BEGIN_JUCER_METADATA
 
-<JUCER_COMPONENT documentType="Component" className="PresetBowserComponent" componentName=""
+<JUCER_COMPONENT documentType="Component" className="PresetsListComponent" componentName=""
                  parentClasses="public Component" constructorParams="" variableInitialisers=""
                  snapPixels="8" snapActive="1" snapShown="1" overlayOpacity="0.330"
                  fixedSize="0" initialWidth="600" initialHeight="400">

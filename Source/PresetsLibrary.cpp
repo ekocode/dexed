@@ -36,7 +36,8 @@ PresetsLibrary::PresetsLibrary (DexedAudioProcessorEditor *editor)
     //[Constructor_pre] You can add your own custom stuff here..
     //[/Constructor_pre]
     mainWindow = editor;
-	xmlPresetLibrary = new XmlElement("DEXEDLIBRARY");
+	xmlPresetLibrary = nullptr;
+	
 	cartDir = DexedAudioProcessor::dexedCartDir;
 	libraryFile = DexedAudioProcessor::dexedAppDir.getChildFile(libraryFilename);
 	
@@ -72,8 +73,12 @@ PresetsLibrary::PresetsLibrary (DexedAudioProcessorEditor *editor)
 	libraryButtonPanel->addAndMakeVisible(scanButton = new TextButton("Import Directory"));
 	scanButton->setBounds(2, 2, 100, 30);
 	scanButton->addListener(this);
+	libraryButtonPanel->addAndMakeVisible(factoryResetButton = new TextButton("Reset Presets Lib"));
+	factoryResetButton->setBounds(104, 2, 120, 30);
+	factoryResetButton->addListener(this);
     //[/Constructor]
-	//generateDefaultXml();
+	loadLibrary();
+	log(xmlPresetLibrary->createDocument(String()));
 }
 
 PresetsLibrary::~PresetsLibrary()
@@ -86,7 +91,11 @@ PresetsLibrary::~PresetsLibrary()
     delete statusWindow;
     
 #endif
-	delete xmlPresetLibrary;
+	if (xmlPresetLibrary != nullptr)
+	{
+		delete xmlPresetLibrary;
+	}
+	
 	delete tagsPanel;
 	delete libraryPanel;
 	delete presetEditorPanel;
@@ -141,6 +150,9 @@ void PresetsLibrary::buttonClicked(juce::Button *buttonThatWasClicked) {
         
         return;
     }
+	if (buttonThatWasClicked == factoryResetButton) {
+		generateDefaultXml();
+	}
 
 
 }
@@ -149,6 +161,7 @@ XmlElement* PresetsLibrary::makeXmlPreset(String name, uint8_t content[PROGRAM_L
 										,int typeTag, int bankTag, Array<int> characteristicTags
 										,String designer, String comment, bool favorite, bool readOnly)
 {
+	
 	XmlElement* element= new XmlElement("PRESET");
 	element->setAttribute("name", name);
 	element->setAttribute("typeTag", typeTag);
@@ -193,7 +206,7 @@ XmlElement* PresetsLibrary::makeXmlTag(String name, bool readOnly)
 
 void PresetsLibrary::generateDefaultXml()
 {
-	
+	xmlPresetLibrary = new XmlElement("DEXEDLIBRARY");
 	
 	xmlPresetLibrary->setAttribute("majorversion", librayVersionMajor);
 	xmlPresetLibrary->setAttribute("minorversion", libraryVersionMinor);
@@ -257,34 +270,19 @@ void PresetsLibrary::generateDefaultXml()
 		xmlPresetsList->addChildElement(makeXmlPreset(presetName, presetDatas,-1,0,Array<int>(),"Dexed","Dexed Factory presets",false,true));
 
 	}
-		
-	
 
-	//for (int i = 0; i < 10; ++i)
-	//{
-	//	// create an inner element…
-	//	XmlElement* xmlPreset = new XmlElement("PRESET");
-	//	xmlPreset->setAttribute("name", "preset" + String(i));
-	//	xmlPreset->setAttribute("favorite", true);
-	//	// …and add our new element to the parent node
-	//	xmlPresetsList->addChildElement(xmlPreset);
-	//}
 
 	xmlPresetLibrary->addChildElement(xmlTagsList);
 	xmlPresetLibrary->addChildElement(xmlPresetsList);
 	// now we can turn the whole thing into a text document…
-	String libraryXmlDoc = xmlPresetLibrary->createDocument(String());
+
 
 	
 	libraryFile.deleteFile();
 	libraryFile.create();
-	libraryFile.appendText(libraryXmlDoc);
-	//if (!saveFile.existsAsFile())
-	//	return;
+	libraryFile.appendText(xmlPresetLibrary->createDocument(String()));
 
-	
-	//log("_CLEAR");
-	log(libraryXmlDoc);
+	//log(libraryXmlDoc);
 
 }
 //[MiscUserCode] You can add your own definitions of your custom methods or any other code here...
@@ -296,7 +294,6 @@ void PresetsLibrary::scan(File dir)
     SyxFileFilter *syxFileFilter = new SyxFileFilter();
     TimeSliceThread *timeSliceThread = new TimeSliceThread("Cartridge Directory Scanner");
     DirectoryContentsList *libraryBrowserList;
-    //cartDir.
 	timeSliceThread->startThread();
 	libraryBrowserList = new DirectoryContentsList(syxFileFilter, *timeSliceThread);
 	libraryBrowserList->setDirectory(dir, true, true);
@@ -304,7 +301,7 @@ void PresetsLibrary::scan(File dir)
 
 	//generateTags();
 
-	log("Scanning: "+ libraryBrowserList->getDirectory().getFileName());
+	//log("Scanning: "+ libraryBrowserList->getDirectory().getFileName());
 	libraryPanel->repaint();
 	this->repaint();
     while(libraryBrowserList->isStillLoading())
@@ -370,12 +367,9 @@ int PresetsLibrary::importCart(File file)
     {
         
 		log(programNames.getReference(j));
-        //log(libraryBrowserList->getDirectory().getFullPathName()+"|"+fileInfos.filename+" | "+programNames.getReference(j));
         uint8_t unpackPgm[PROGRAM_LENGTH];
         cart.unpackProgram(unpackPgm,j);
         cart.getVoiceSysex();
-        
-        //result += String((char *)unpackPgm)+newLine;
     }
     
     return rc;
@@ -384,13 +378,17 @@ int PresetsLibrary::importCart(File file)
 
 int PresetsLibrary::loadLibrary()
 {
-
-	return 1;
+	if (!libraryFile.existsAsFile())
+		return -1;
+	xmlPresetLibrary = XmlDocument::parse(libraryFile);
+	if (xmlPresetLibrary == NULL)
+		return 1;
+	return 0;
 }
 
 int PresetsLibrary::saveLibrary()
 {
-	generateDefaultXml();
+	//generateDefaultXml();
 
 	return 1;
 }
