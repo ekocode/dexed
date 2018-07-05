@@ -69,6 +69,8 @@ PresetsLibrary::PresetsLibrary (DexedAudioProcessorEditor *editor)
 	addAndMakeVisible(presetEditorPanel = new PresetEditorPanel());
 	presetEditorPanel->setBounds(getLocalBounds().removeFromTop(height - toolbarHeight).removeFromRight(width / 4));
 	addAndMakeVisible(libraryButtonPanel = new LibraryButtonsPanel());
+
+
 	libraryButtonPanel->setBounds(getLocalBounds().removeFromBottom(toolbarHeight));
 	libraryButtonPanel->addAndMakeVisible(scanButton = new TextButton("Import Directory"));
 	scanButton->setBounds(2, 2, 100, 30);
@@ -78,6 +80,7 @@ PresetsLibrary::PresetsLibrary (DexedAudioProcessorEditor *editor)
 	factoryResetButton->addListener(this);
     //[/Constructor]
 	loadLibrary();
+	libraryPanel->addAndMakeVisible(presetListBox = new PresetsListComponent(xmlPresetLibrary));
 	log(xmlPresetLibrary->createDocument(String()));
 }
 
@@ -97,8 +100,10 @@ PresetsLibrary::~PresetsLibrary()
 	}
 	
 	delete tagsPanel;
+	delete presetListBox;
 	delete libraryPanel;
 	delete presetEditorPanel;
+	
 	delete libraryButtonPanel;	
 
     //[Destructor]. You can add your own custom destruction code here..
@@ -281,7 +286,7 @@ void PresetsLibrary::generateDefaultXml()
 	libraryFile.create();
 	libraryFile.appendText(xmlPresetLibrary->createDocument(String()));
 
-	//log(libraryXmlDoc);
+	log((xmlPresetLibrary->getChildByName("DEXEDLIBRARY"))->createDocument(String()));
 
 }
 //[MiscUserCode] You can add your own definitions of your custom methods or any other code here...

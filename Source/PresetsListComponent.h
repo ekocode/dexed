@@ -37,20 +37,36 @@ class PresetsListComponent  : public Component , public TableListBoxModel
 {
 public:
     //==============================================================================
-    PresetsListComponent ();
+	PresetsListComponent(XmlElement * xmlPresetLibrary);
     ~PresetsListComponent();
 
     //==============================================================================
     //[UserMethods]     -- You can add your own custom methods in this section.
+	void loadData(XmlElement * xmlPresetLibrary);
     //[/UserMethods]
 
     void paint (Graphics& g) override;
     void resized() override;
 
+	int getNumRows() override;
+	void paintRowBackground(Graphics& g, int rowNumber, int /*width*/, int /*height*/, bool rowIsSelected) override;
+	void paintCell(Graphics& g, int rowNumber, int columnId,
+		int width, int height, bool /*rowIsSelected*/) override;
+
 
 
 private:
     //[UserVariables]   -- You can add your own custom variables in this section.
+	TableListBox table;     // the table component itself
+	Font font{ 14.0f };
+
+	std::unique_ptr<XmlElement> demoData;  // This is the XML document loaded from the embedded file "demo table data.xml"
+	XmlElement* columnList = nullptr;     // A pointer to the sub-node of demoData that contains the list of columns
+	XmlElement* dataList = nullptr;     // A pointer to the sub-node of demoData that contains the list of data rows
+	int numRows;                          // The number of rows of data we've got
+
+	String getAttributeNameForColumnId(const int columnId) const;
+	
     //[/UserVariables]
 
     //==============================================================================

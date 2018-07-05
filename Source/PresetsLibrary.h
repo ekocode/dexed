@@ -25,6 +25,7 @@
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "PluginEditor.h"
 #include "CartManager.h"
+#include "PresetsListComponent.h"
 //[/Headers]
 
 #define PROGRAM_LENGTH 161
@@ -120,6 +121,7 @@ class PresetsLibrary  : public Component, public Button::Listener
 
 	TagsPanel *tagsPanel;
 	LibraryPanel *libraryPanel;
+	PresetsListComponent *presetListBox;
 	PresetEditorPanel *presetEditorPanel;
 	LibraryButtonsPanel *libraryButtonPanel;
     
