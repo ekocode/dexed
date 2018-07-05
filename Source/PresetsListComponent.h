@@ -21,10 +21,12 @@
 
 //[Headers]     -- You can add your own extra header files here --
 #include "../JuceLibraryCode/JuceHeader.h"
+#include "DXLookNFeel.h"
+#include "PresetsLibrary.h"
 //[/Headers]
 
 
-
+class PresetsLibrary;
 //==============================================================================
 /**
                                                                     //[Comments]
@@ -37,7 +39,7 @@ class PresetsListComponent  : public Component , public TableListBoxModel
 {
 public:
     //==============================================================================
-	PresetsListComponent(XmlElement * xmlPresetLibrary);
+	PresetsListComponent(PresetsLibrary * presetsLibrary);
     ~PresetsListComponent();
 
     //==============================================================================
@@ -59,8 +61,8 @@ private:
     //[UserVariables]   -- You can add your own custom variables in this section.
 	TableListBox table;     // the table component itself
 	Font font{ 14.0f };
-
-	std::unique_ptr<XmlElement> demoData;  // This is the XML document loaded from the embedded file "demo table data.xml"
+    PresetsLibrary* presetsLibrary;
+	//std::unique_ptr<XmlElement> demoData;  // This is the XML document loaded from the embedded file "demo table data.xml"
 	XmlElement* columnList = nullptr;     // A pointer to the sub-node of demoData that contains the list of columns
 	XmlElement* dataList = nullptr;     // A pointer to the sub-node of demoData that contains the list of data rows
 	int numRows;                          // The number of rows of data we've got

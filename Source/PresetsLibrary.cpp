@@ -37,6 +37,7 @@ PresetsLibrary::PresetsLibrary (DexedAudioProcessorEditor *editor)
     //[/Constructor_pre]
     mainWindow = editor;
 	xmlPresetLibrary = nullptr;
+    presetListBox = nullptr;
 	
 	cartDir = DexedAudioProcessor::dexedCartDir;
 	libraryFile = DexedAudioProcessor::dexedAppDir.getChildFile(libraryFilename);
@@ -54,9 +55,6 @@ PresetsLibrary::PresetsLibrary (DexedAudioProcessorEditor *editor)
     statusText->setVisible(true);
 #endif
     
-    
-
-
     setSize (812, 384);
 	int width = getLocalBounds().getWidth();
 	int height = getLocalBounds().getHeight();
@@ -80,8 +78,18 @@ PresetsLibrary::PresetsLibrary (DexedAudioProcessorEditor *editor)
 	factoryResetButton->addListener(this);
     //[/Constructor]
 	loadLibrary();
-	libraryPanel->addAndMakeVisible(presetListBox = new PresetsListComponent(xmlPresetLibrary));
-	log(xmlPresetLibrary->createDocument(String()));
+	libraryPanel->addAndMakeVisible(presetListBox = new PresetsListComponent(this));
+//    XmlElement* xml = xmlPresetLibrary->getChildByName("DEXEDLIBRARY");
+//    if(xml == nullptr)
+//    {
+//        log("No DEXEDLIBRARY");
+//    }
+//    xml = xmlPresetLibrary->getChildByName("PRESETS");
+//    if(xml == nullptr)
+//    {
+//        log("No PRESETS");
+//    }
+//    log(xml->createDocument(String()));
 }
 
 PresetsLibrary::~PresetsLibrary()
@@ -100,10 +108,13 @@ PresetsLibrary::~PresetsLibrary()
 	}
 	
 	delete tagsPanel;
-	delete presetListBox;
+    if(presetListBox != nullptr)
+    {
+        delete presetListBox;
+    }
+	
 	delete libraryPanel;
 	delete presetEditorPanel;
-	
 	delete libraryButtonPanel;	
 
     //[Destructor]. You can add your own custom destruction code here..
@@ -383,7 +394,7 @@ int PresetsLibrary::importCart(File file)
 int PresetsLibrary::loadLibrary()
 {
 	if (!libraryFile.existsAsFile())
-		return -1;
+        generateDefaultXml();
 	xmlPresetLibrary = XmlDocument::parse(libraryFile);
 	if (xmlPresetLibrary == NULL)
 		return 1;
@@ -410,6 +421,25 @@ void PresetsLibrary::log(juce::String message)
 #endif
 }
 
+
+String PresetsLibrary::getTagName(int id,TagType type)
+{
+    String typeString;
+    switch(type)
+    {
+        case TagType::BANK:
+            typeString = "BANKS";
+            break;
+        case TagType::TYPE:
+            typeString = "TYPES";
+            break;
+        case TagType::CHARACTERISTIC:
+            typeString = "CHARACTERISTICS";
+            break;
+            
+    }
+    return  (((xmlPresetLibrary->getChildByName("TAGS"))->getChildByName("BANKS"))->getChildElement(id))->getStringAttribute("name", String());
+}
 
 
 //==============================================================================

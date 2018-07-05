@@ -30,6 +30,14 @@
 
 #define PROGRAM_LENGTH 161
 
+typedef enum
+{
+    TYPE,
+    BANK,
+    CHARACTERISTIC
+} TagType;
+
+class PresetsListComponent;
 
 struct TagsPanel : public Component
 {
@@ -130,12 +138,12 @@ class PresetsLibrary  : public Component, public Button::Listener
     TextEditor *statusText;
     #endif
     
-	XmlElement* xmlPresetLibrary;
+	
     String statusMessage;
 	
     
 public:
-    
+    XmlElement* xmlPresetLibrary;
     //==============================================================================
     PresetsLibrary (DexedAudioProcessorEditor *editor);
     ~PresetsLibrary();
@@ -163,6 +171,8 @@ public:
 	int importCart(File file);
     
     void log(String message="");
+    
+    String getTagName(int id,TagType type=CHARACTERISTIC);
     
 
 

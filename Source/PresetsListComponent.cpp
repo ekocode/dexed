@@ -27,12 +27,13 @@
 //[/MiscUserDefs]
 
 //==============================================================================
-PresetsListComponent::PresetsListComponent (XmlElement* xmlPresetLibrary)
+PresetsListComponent::PresetsListComponent (PresetsLibrary * presetsLibrary)
 {
+    this->presetsLibrary = presetsLibrary;
     //[Constructor_pre] You can add your own custom stuff here..
     //[/Constructor_pre]
 	// Load some data from an embedded XML file..
-	loadData(xmlPresetLibrary);
+	loadData(presetsLibrary->xmlPresetLibrary);
 
 	// Create our table component and add it to this component..
 	addAndMakeVisible(table);
@@ -45,11 +46,12 @@ PresetsListComponent::PresetsListComponent (XmlElement* xmlPresetLibrary)
 	// Add some columns to the table header, based on the column list in our database..
 	/*forEachXmlChildElement(*columnList, columnXml)
 	{*/
-		//table.getHeader().addColumn("Name",0,200,50, 400,TableHeaderComponent::defaultFlags);
-		//table.getHeader().addColumn("Instrument", 1, 200, 50, 400, TableHeaderComponent::defaultFlags);
-		//table.getHeader().addColumn("Bank", 2, 200, 50, 400, TableHeaderComponent::defaultFlags);
-		//table.getHeader().addColumn("Designer", 3, 200, 50, 400, TableHeaderComponent::defaultFlags);
-		//table.getHeader().addColumn("Favorite", 4, 20, 20, 20, TableHeaderComponent::defaultFlags);
+    int width=80;
+		table.getHeader().addColumn("Name",1,width,width, width,TableHeaderComponent::defaultFlags);
+        table.getHeader().addColumn("Instrument", 2, width, width, width, TableHeaderComponent::defaultFlags);
+        table.getHeader().addColumn("Bank", 3, width, width, width, TableHeaderComponent::defaultFlags);
+        table.getHeader().addColumn("Designer", 4, width, width, width, TableHeaderComponent::defaultFlags);
+        table.getHeader().addColumn("Favorite", 5, 20, 20, 20, TableHeaderComponent::defaultFlags);
 	//}
 
 	// we could now change some initial settings..
@@ -84,8 +86,8 @@ PresetsListComponent::~PresetsListComponent()
 
 void PresetsListComponent::loadData(XmlElement* xmlPresetLibrary)
 {
-		dataList = xmlPresetLibrary->getChildByName("PRESETS");
-		numRows = dataList->getNumChildElements();
+        dataList = xmlPresetLibrary->getChildByName("PRESETS");
+        numRows = dataList->getNumChildElements();
 	
 }
 
@@ -95,7 +97,7 @@ void PresetsListComponent::paint (Graphics& g)
     //[UserPrePaint] Add your own custom painting code here..
     //[/UserPrePaint]
 
-    g.fillAll (Colours::red);
+    g.fillAll (DXLookNFeel::background);
 
     //[UserPaint] Add your own custom painting code here..
     //[/UserPaint]
@@ -117,25 +119,62 @@ int PresetsListComponent::getNumRows()
 
 void PresetsListComponent::paintRowBackground(Graphics & g, int rowNumber, int, int, bool rowIsSelected)
 {
-	auto alternateColour = getLookAndFeel().findColour(ListBox::backgroundColourId)
-		.interpolatedWith(getLookAndFeel().findColour(ListBox::textColourId), 0.03f);
-	if (rowIsSelected)
-		g.fillAll(Colours::lightblue);
-	else if (rowNumber % 2)
-		g.fillAll(alternateColour);
+    auto mainColour =  DXLookNFeel::fillColour.interpolatedWith(Colours::black, 0.98f);
+    auto alternateColour =  DXLookNFeel::fillColour.interpolatedWith(Colours::black, 0.9f);
+    auto selectedColour =  DXLookNFeel::fillColour.interpolatedWith(Colours::black, 0.05f);
+    if (rowIsSelected)
+        g.fillAll(selectedColour);
+    else if (rowNumber % 2)
+        g.fillAll(mainColour);
+    else
+    {
+        g.fillAll(alternateColour);
+    }
 }
 
 void PresetsListComponent::paintCell(Graphics & g, int rowNumber, int columnId, int width, int height, bool)
 {
-	g.setColour(getLookAndFeel().findColour(ListBox::textColourId));
+	g.setColour(DXLookNFeel::fillColour);
 	g.setFont(font);
+    String text;
 
-	/*if (auto* rowElement = dataList->getChildElement(rowNumber))
-	{
-		auto text = rowElement->getStringAttribute(getAttributeNameForColumnId(columnId));
+    if (auto* rowElement = dataList->getChildElement(rowNumber))
+    {
+        
+        if(columnId==2)
+        {
+            auto value = rowElement->getIntAttribute(getAttributeNameForColumnId(columnId));
+            if(value==-1)
+            {
+                text="Undefined";
+            }
+            else
+            {
+                text = presetsLibrary->getTagName(value,TagType::TYPE);
+            }
+            
+        }
+        else if(columnId==3)
+        {
+            auto value = rowElement->getIntAttribute(getAttributeNameForColumnId(columnId));
+            if(value==-1)
+            {
+                text="User";
+            }
+            else
+            {
+                
+                text = presetsLibrary->getTagName(value,TagType::BANK);
+            }
+            
+        }
+        else
+        {
+            text = rowElement->getStringAttribute(getAttributeNameForColumnId(columnId));
+        }
 
-		g.drawText(text, 2, 0, width - 4, height, Justification::centredLeft, true);
-	}*/
+        g.drawText(text, 2, 0, width - 4, height, Justification::centredLeft, true);
+    }
 
 	
 
@@ -147,15 +186,15 @@ String PresetsListComponent::getAttributeNameForColumnId(const int columnId) con
 {
 	switch (columnId)
 	{
-	case 0:
-		return "name";
 	case 1:
-		return "typeTag";
+		return "name";
 	case 2:
-		return "bankTag";
+		return "typeTag";
 	case 3:
-		return "designer";
+		return "bankTag";
 	case 4:
+		return "designer";
+	case 5:
 		return "favorite";
 	default:
 		return "";
