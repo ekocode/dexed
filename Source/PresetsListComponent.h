@@ -54,7 +54,7 @@ public:
 	void paintRowBackground(Graphics& g, int rowNumber, int /*width*/, int /*height*/, bool rowIsSelected) override;
 	void paintCell(Graphics& g, int rowNumber, int columnId,
 		int width, int height, bool /*rowIsSelected*/) override;
-
+	void sortOrderChanged(int newSortColumnId, bool isForwards) override;
 
 
 private:
@@ -70,7 +70,33 @@ private:
 	String getAttributeNameForColumnId(const int columnId) const;
 	
     //[/UserVariables]
+	//==============================================================================
+	// A comparator used to sort our data when the user clicks a column header
+	class LibraryDataSorter
+	{
+	public:
+		LibraryDataSorter(const String& attributeToSortBy, bool forwards)
+			: attributeToSort(attributeToSortBy),
+			direction(forwards ? 1 : -1)
+		{
+		}
 
+		int compareElements(XmlElement* first, XmlElement* second) const
+		{
+			auto result = first->getStringAttribute(attributeToSort)
+				.compareNatural(second->getStringAttribute(attributeToSort));
+
+			if (result == 0)
+				result = first->getStringAttribute("ID")
+				.compareNatural(second->getStringAttribute("ID"));
+
+			return direction * result;
+		}
+
+	private:
+		String attributeToSort;
+		int direction;
+	};
     //==============================================================================
 
 

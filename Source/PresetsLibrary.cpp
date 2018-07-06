@@ -36,11 +36,14 @@ PresetsLibrary::PresetsLibrary (DexedAudioProcessorEditor *editor)
     //[Constructor_pre] You can add your own custom stuff here..
     //[/Constructor_pre]
     mainWindow = editor;
+	
+	
+
 	xmlPresetLibrary = nullptr;
     presetListBox = nullptr;
 	
 	cartDir = DexedAudioProcessor::dexedCartDir;
-	libraryFile = DexedAudioProcessor::dexedAppDir.getChildFile(libraryFilename);
+	libraryFile = DexedAudioProcessor::dexedAppDir.getChildFile(LIBRARY_FILENAME);
 	
 #ifdef DEBUG
     statusWindow = new DocumentWindow("Status",Colours::darkgrey,0);    
@@ -80,17 +83,8 @@ PresetsLibrary::PresetsLibrary (DexedAudioProcessorEditor *editor)
 	loadLibrary();
 	libraryPanel->addAndMakeVisible(presetListBox = new PresetsListComponent(this));
     makeTagsButtons();
-//    XmlElement* xml = xmlPresetLibrary->getChildByName("DEXEDLIBRARY");
-//    if(xml == nullptr)
-//    {
-//        log("No DEXEDLIBRARY");
-//    }
-//    xml = xmlPresetLibrary->getChildByName("PRESETS");
-//    if(xml == nullptr)
-//    {
-//        log("No PRESETS");
-//    }
-//    log(xml->createDocument(String()));
+
+	setVisible(true);
 }
 
 PresetsLibrary::~PresetsLibrary()
@@ -108,7 +102,7 @@ PresetsLibrary::~PresetsLibrary()
 		delete xmlPresetLibrary;
 	}
 	
-    tagsPanel->deleteAllChildren();
+    //tagsPanel->deleteAllChildren();
 	delete tagsPanel;
     if(presetListBox != nullptr)
     {
@@ -129,10 +123,8 @@ void PresetsLibrary::paint (Graphics& g)
     //[UserPrePaint] Add your own custom painting code here..
     //[/UserPrePaint]
 
-    g.fillAll (Colour (0xff323e44));
+	g.fillAll (DXLookNFeel::lightBackground);
 
-
-    
     //[UserPaint] Add your own custom painting code here..
     //[/UserPaint]
 }
@@ -179,7 +171,7 @@ XmlElement* PresetsLibrary::makeXmlPreset(String name, uint8_t content[PROGRAM_L
 										,String designer, String comment, bool favorite, bool readOnly)
 {
 	
-	XmlElement* element= new XmlElement("PRESET");
+	XmlElement* element= new XmlElement(XML_TAG_PRESET);
 	element->setAttribute("name", name);
 	element->setAttribute("typeTag", typeTag);
 	element->setAttribute("bankTag", bankTag);
@@ -213,7 +205,7 @@ XmlElement* PresetsLibrary::makeXmlPreset(String name, uint8_t content[PROGRAM_L
 
 XmlElement* PresetsLibrary::makeXmlTag(String name, bool readOnly)
 {
-	XmlElement* element = new XmlElement("TAG");
+	XmlElement* element = new XmlElement(XML_TAG_TAG);
 	element->setAttribute("name", name);
 	element->setAttribute("readOnly", readOnly);
 	return element;
@@ -223,15 +215,15 @@ XmlElement* PresetsLibrary::makeXmlTag(String name, bool readOnly)
 
 void PresetsLibrary::generateDefaultXml()
 {
-	xmlPresetLibrary = new XmlElement("DEXEDLIBRARY");
+	xmlPresetLibrary = new XmlElement(XML_TAG_LIBRARY);
 	
-	xmlPresetLibrary->setAttribute("majorversion", librayVersionMajor);
-	xmlPresetLibrary->setAttribute("minorversion", libraryVersionMinor);
+	xmlPresetLibrary->setAttribute("majorversion", LIBRARY_VERSION_MAJOR);
+	xmlPresetLibrary->setAttribute("minorversion", LIBRARY_VERSION_MINOR);
 
-	XmlElement *xmlTagsList = new XmlElement("TAGS");
-	XmlElement *xmlTagsTypeList = new XmlElement("TYPES");
-	XmlElement *xmlTagsCharacteristicList = new XmlElement("CHARACTERISTIC");
-	XmlElement *xmlTagsBankList = new XmlElement("BANKS");
+	XmlElement *xmlTagsList = new XmlElement(XML_TAG_TAGS);
+	XmlElement *xmlTagsTypeList = new XmlElement(XML_TAG_TYPES);
+	XmlElement *xmlTagsCharacteristicList = new XmlElement(XML_TAG_CHARACTERISTICS);
+	XmlElement *xmlTagsBankList = new XmlElement(XML_TAG_BANKS);
 
 	xmlTagsList->addChildElement(xmlTagsTypeList);
 	xmlTagsList->addChildElement(xmlTagsCharacteristicList);
@@ -270,9 +262,9 @@ void PresetsLibrary::generateDefaultXml()
 	//xmlTagsBankList default
 	xmlTagsBankList->addChildElement(makeXmlTag("Factory", true));
 
-	XmlElement *xmlPresetsList = new XmlElement("PRESETS");
+	XmlElement *xmlPresetsList = new XmlElement(XML_TAG_PRESETS);
 
-	File startupFile = cartDir.getChildFile("Dexed_01.syx");
+	File startupFile = cartDir.getChildFile(LIBRARY_DEFAULT_CART);
 	StringArray programNames;
 	Cartridge cart;
 	int rc = cart.load(startupFile);
@@ -299,7 +291,7 @@ void PresetsLibrary::generateDefaultXml()
 	libraryFile.create();
 	libraryFile.appendText(xmlPresetLibrary->createDocument(String()));
 
-	log((xmlPresetLibrary->getChildByName("DEXEDLIBRARY"))->createDocument(String()));
+	log((xmlPresetLibrary->getChildByName(XML_TAG_LIBRARY))->createDocument(String()));
 
 }
 //[MiscUserCode] You can add your own definitions of your custom methods or any other code here...
@@ -390,29 +382,41 @@ int PresetsLibrary::importCart(File file)
 
 void PresetsLibrary::makeTagsButtons()
 {
-    XmlElement* typeElements = (xmlPresetLibrary->getChildByName("TAGS"))->getChildByName("TYPES");
-    XmlElement* bankElements = (xmlPresetLibrary->getChildByName("TAGS"))->getChildByName("BANKS");
-    XmlElement* characteristicElements = (xmlPresetLibrary->getChildByName("TAGS"))->getChildByName("CHARACTERISTICS");
-    if(typeElements==nullptr)
+    XmlElement* typeElements = (xmlPresetLibrary->getChildByName(XML_TAG_TAGS))->getChildByName(XML_TAG_TYPES);
+    XmlElement* bankElements = (xmlPresetLibrary->getChildByName(XML_TAG_TAGS))->getChildByName(XML_TAG_BANKS);
+    XmlElement* characteristicElements = (xmlPresetLibrary->getChildByName(XML_TAG_TAGS))->getChildByName(XML_TAG_CHARACTERISTICS);
+    if(characteristicElements ==nullptr)
     {
         log("null");
     }
     else{
-        log("nb:"+String(typeElements->getNumChildElements()));
+        log("nb:"+String(characteristicElements->getNumChildElements()));
     }
-    TagButton* childButton;
+    
     int i;
     i=0;
     forEachXmlChildElement(*typeElements, child)
     {
-        tagsPanel->addAndMakeVisible(childButton = new TagButton(child->getStringAttribute("name"),i,TagType::TYPE));
-        tagsPanel->addTypeButton(childButton);
-        childButton->setSize(200,50);
-        
-        //childButton->setBounds(2, 2, 200,40);
+         tagsPanel->addButton(new TagButton(child->getStringAttribute("name"), i, TagType::TYPE));
+
         i++;
     }
+	i = 0;
+	
+	forEachXmlChildElement(*characteristicElements, child)
+	{
+		tagsPanel->addButton(new TagButton(child->getStringAttribute("name"), i, TagType::CHARACTERISTIC));
 
+		i++;
+	}
+	i = 0;
+	forEachXmlChildElement(*bankElements, child)
+	{
+		tagsPanel->addButton(new TagButton(child->getStringAttribute("name"), i, TagType::BANK));
+
+		i++;
+	}
+	tagsPanel->performLayout();
     
 };
 
@@ -453,17 +457,17 @@ String PresetsLibrary::getTagName(int id,TagType type)
     switch(type)
     {
         case TagType::BANK:
-            typeString = "BANKS";
+            typeString = XML_TAG_BANKS;
             break;
         case TagType::TYPE:
-            typeString = "TYPES";
+            typeString = XML_TAG_TYPES;
             break;
         case TagType::CHARACTERISTIC:
-            typeString = "CHARACTERISTICS";
+            typeString = XML_TAG_CHARACTERISTICS;
             break;
             
     }
-    return  (((xmlPresetLibrary->getChildByName("TAGS"))->getChildByName("BANKS"))->getChildElement(id))->getStringAttribute("name", String());
+    return  (((xmlPresetLibrary->getChildByName(XML_TAG_TAGS))->getChildByName(typeString))->getChildElement(id))->getStringAttribute("name", String());
 }
 
 

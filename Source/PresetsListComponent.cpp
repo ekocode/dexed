@@ -30,6 +30,7 @@
 PresetsListComponent::PresetsListComponent (PresetsLibrary * presetsLibrary)
 {
     this->presetsLibrary = presetsLibrary;
+	
     //[Constructor_pre] You can add your own custom stuff here..
     //[/Constructor_pre]
 	// Load some data from an embedded XML file..
@@ -47,7 +48,7 @@ PresetsListComponent::PresetsListComponent (PresetsLibrary * presetsLibrary)
 	// Add some columns to the table header, based on the column list in our database..
 	/*forEachXmlChildElement(*columnList, columnXml)
 	{*/
-    int width=80;
+    int width=(presetsLibrary->libraryPanel->getWidth()-20)/4;
 		table.getHeader().addColumn("Name",1,width,width, width,TableHeaderComponent::defaultFlags);
         table.getHeader().addColumn("Instrument", 2, width, width, width, TableHeaderComponent::defaultFlags);
         table.getHeader().addColumn("Bank", 3, width, width, width, TableHeaderComponent::defaultFlags);
@@ -57,17 +58,18 @@ PresetsListComponent::PresetsListComponent (PresetsLibrary * presetsLibrary)
 
 	// we could now change some initial settings..
 	table.getHeader().setSortColumnId(1, true); // sort forwards by the ID column
-	table.getHeader().setColumnVisible(7, false); // hide the "length" column until the user shows it
+	//table.getHeader().setColumnVisible(7, false); // hide the "length" column until the user shows it
 
 												  // un-comment this line to have a go of stretch-to-fit mode
 												  // table.getHeader().setStretchToFitActive (true);
 
-	table.setMultipleSelectionEnabled(true);
+	table.setMultipleSelectionEnabled(false);
+	table.getViewport()->setScrollBarsShown(false, false, true);
 
     //[UserPreSize]
     //[/UserPreSize]
 
-    setSize (600, 400);
+    setSize (presetsLibrary->libraryPanel->getWidth(), presetsLibrary->libraryPanel->getHeight());
 
 
     //[Constructor] You can add your own custom stuff here..
@@ -98,7 +100,7 @@ void PresetsListComponent::paint (Graphics& g)
     //[UserPrePaint] Add your own custom painting code here..
     //[/UserPrePaint]
 
-    g.fillAll (DXLookNFeel::background);
+   // g.fillAll (DXLookNFeel::background);
 
     //[UserPaint] Add your own custom painting code here..
     //[/UserPaint]
@@ -108,7 +110,9 @@ void PresetsListComponent::resized()
 {
     //[UserPreResize] Add your own custom resize code here..
     //[/UserPreResize]
-	table.setBoundsInset(BorderSize<int>(0));
+	/*Rectangle<int> bounds = presetsLibrary->getLocalBounds();
+	bounds.removeFromBottom(40);*/
+	table.setBoundsInset(BorderSize(0,0,2,2));
     //[UserResized] Add your own custom resize handling here..
     //[/UserResized]
 }
@@ -120,22 +124,20 @@ int PresetsListComponent::getNumRows()
 
 void PresetsListComponent::paintRowBackground(Graphics & g, int rowNumber, int, int, bool rowIsSelected)
 {
-    auto mainColour =  DXLookNFeel::fillColour.interpolatedWith(Colours::black, 0.98f);
-    auto alternateColour =  DXLookNFeel::fillColour.interpolatedWith(Colours::black, 0.9f);
-    auto selectedColour =  DXLookNFeel::fillColour.interpolatedWith(Colours::black, 0.05f);
+   
     if (rowIsSelected)
-        g.fillAll(selectedColour);
+        g.fillAll(DXLookNFeel::librarySelectedBackground);
     else if (rowNumber % 2)
-        g.fillAll(mainColour);
+        g.fillAll(DXLookNFeel::libraryDarkBackground);
     else
     {
-        g.fillAll(alternateColour);
+        g.fillAll(DXLookNFeel::libraryDarkBackgroundAlt);
     }
 }
 
 void PresetsListComponent::paintCell(Graphics & g, int rowNumber, int columnId, int width, int height, bool)
 {
-	g.setColour(DXLookNFeel::fillColour);
+	g.setColour(DXLookNFeel::libraryText);
 	g.setFont(font);
     Justification::Flags justification;
     justification = Justification::centredLeft;
@@ -223,7 +225,16 @@ String PresetsListComponent::getAttributeNameForColumnId(const int columnId) con
 }
 
 
+void PresetsListComponent::sortOrderChanged(int newSortColumnId, bool isForwards)
+{
+	if (newSortColumnId != 0)
+	{
+		LibraryDataSorter sorter(getAttributeNameForColumnId(newSortColumnId), isForwards);
+		dataList->sortChildElements(sorter);
 
+		table.updateContent();
+	}
+}
 
 
 //[MiscUserCode] You can add your own definitions of your custom methods or any other code here...

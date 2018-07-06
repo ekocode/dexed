@@ -232,8 +232,17 @@ void DXLookNFeel::positionComboBoxText(ComboBox& box, Label& label) {
     LookAndFeel_V3::positionComboBoxText(box, label);
 }
 
+void DXLookNFeel::drawTableHeaderBackground(Graphics &g, TableHeaderComponent &th)
+{
+	g.fillAll(DXLookNFeel::fillColour);
+}
+
 Colour DXLookNFeel::fillColour = Colour(77,159,151);
 Colour DXLookNFeel::lightBackground = Colour(78,72,63);
 Colour DXLookNFeel::background = Colour(60,50,47);
 Colour DXLookNFeel::roundBackground = Colour(58,52,48);
-
+Colour DXLookNFeel::libraryDarkBackground = DXLookNFeel::background.interpolatedWith(Colours::black, 0.5f);
+Colour DXLookNFeel::libraryDarkBackgroundAlt = DXLookNFeel::background.interpolatedWith(Colours::black, 0.6f);
+Colour DXLookNFeel::libraryText = fillColour;
+Colour DXLookNFeel::libraryDarkText = Colours::black;
+Colour DXLookNFeel::librarySelectedBackground = DXLookNFeel::fillColour.interpolatedWith(Colours::black, 0.6f);

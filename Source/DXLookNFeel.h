@@ -48,10 +48,17 @@ public:
     virtual Typeface::Ptr getTypefaceForFont(const Font &) override;
     virtual void positionComboBoxText (ComboBox& box, Label& label) override;
 
+	void drawTableHeaderBackground(Graphics &g, TableHeaderComponent &th) override;
+
     static Colour fillColour;
     static Colour lightBackground;
     static Colour background;
     static Colour roundBackground;
+	static Colour libraryDarkBackground;
+	static Colour libraryDarkBackgroundAlt;
+	static Colour libraryText;
+	static Colour libraryDarkText;
+	static Colour librarySelectedBackground;
 };
 
 #endif  // DXLOOKNFEEL_H_INCLUDED

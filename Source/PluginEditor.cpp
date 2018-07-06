@@ -88,6 +88,8 @@ DexedAudioProcessorEditor::DexedAudioProcessorEditor (DexedAudioProcessor* owner
     
     updateUI();
     startTimer(100);
+
+	
 }
 
 DexedAudioProcessorEditor::~DexedAudioProcessorEditor() {

@@ -30,6 +30,21 @@
 
 #define PROGRAM_LENGTH 161
 
+#define XML_TAG_LIBRARY "DEXEDLIBRARY"
+#define XML_TAG_TAGS "TAGS"
+#define XML_TAG_TAG "TAG"
+#define XML_TAG_TYPES "TYPES"
+#define XML_TAG_BANKS "BANKS"
+#define XML_TAG_CHARACTERISTICS "CHARACTERISTICS"
+#define XML_TAG_PRESETS "PRESETS"
+#define XML_TAG_PRESET "PRESET"
+
+#define LIBRARY_VERSION_MAJOR 1
+#define LIBRARY_VERSION_MINOR 0
+#define LIBRARY_FILENAME "Dexed.presets.xml"
+#define LIBRARY_DEFAULT_CART "Dexed_01.syx"
+
+
 typedef enum
 {
     TYPE,
@@ -39,7 +54,7 @@ typedef enum
 
 class PresetsListComponent;
 
-struct TagButton : public TextButton
+struct TagButton : public ToggleButton
 {
 public:
     TagButton(String name,int id,TagType type)
@@ -48,20 +63,25 @@ public:
         this->id = id;
         this->type = type;
     }
-    //    void paint (Graphics& g) override
-    //    {
-    //
-    //    }
-        void resized() override
-        {
-            if (auto parent = getParentComponent())
-                parent->resized();
+        void paint (Graphics& g) override
+        { 
+			if (getToggleState())
+			{
+				g.setColour(DXLookNFeel::librarySelectedBackground);
+				g.fillRect(getLocalBounds());
+				g.setColour(DXLookNFeel::libraryText);
+				g.drawText(getButtonText(), getLocalBounds().toFloat(), Justification::centred);
+			}
+			else
+			{
+				g.setColour(DXLookNFeel::roundBackground);
+				g.fillRect(getLocalBounds());
+				g.setColour(DXLookNFeel::libraryDarkBackground);
+				g.drawText(getButtonText(), getLocalBounds().toFloat(), Justification::centred);
+			}
+
+			
         }
-    //    void drawButtonBackground (Graphics& g, Button& button, const Colour& backgroundColour,
-    //                               bool isMouseOverButton, bool isButtonDown) override
-    //    {
-    //        //...
-    //    }
     
     int id;
     TagType type;
@@ -70,40 +90,70 @@ public:
 
 
 struct TagsPanel : public Component
-{
-    
+{    
     FlexBox typeFlexBox;
-    
-    Array<TagButton*> TypeButtons;
+	FlexBox characteristicFlexBox;
+	FlexBox bankFlexBox;    
+	OwnedArray<TagButton> typeButtons;
+	OwnedArray<TagButton> characteristicButtons;
+	OwnedArray<TagButton> bankButtons;
+
 	TagsPanel()
 	{
-        
+		typeFlexBox.alignContent = FlexBox::AlignContent::flexStart;
+		typeFlexBox.flexDirection = FlexBox::Direction::row;
+		typeFlexBox.justifyContent = FlexBox::JustifyContent::flexStart;
+		typeFlexBox.alignItems = FlexBox::AlignItems::flexStart;
+		typeFlexBox.flexWrap = FlexBox::Wrap::wrap;
 	}
     
-    void addTypeButton(TagButton* button)
-    {
-        TypeButtons.add(button);
+    void addButton(TagButton* button, TagType tagType=TagType::TYPE)
+    {   
+		FlexBox* destFlexBox;
+		OwnedArray<TagButton>* destOwnedArray;
+
+		switch (tagType)
+		{
+		case TagType::TYPE:
+			destFlexBox = &typeFlexBox;
+			destOwnedArray = &typeButtons;
+			break;
+		case TagType::CHARACTERISTIC:
+			destFlexBox = &characteristicFlexBox;
+			destOwnedArray = &characteristicButtons;
+			break;
+		case TagType::BANK:
+			destFlexBox = &bankFlexBox;
+			destOwnedArray = &bankButtons;
+			break;
+		}		
+
+		destFlexBox->items.add(FlexItem((getWidth() / 3) - 2, 20).withMargin(1));
+		auto &flexItem = destFlexBox->items.getReference(destFlexBox->items.size() - 1);
+		destOwnedArray->add(button);
+		flexItem.associatedComponent = button;
+		addAndMakeVisible(button);
     }
 
-//    void paint(Graphics& g) override
-//    {
-//        g.fillAll(Colours::chocolate);
-//    }
+    //void paint(Graphics& g) override
+    //{
+    //   // g.fillAll(Colours::chocolate);
+    //}
     
     void resized() override
     {
-                                               // [1]
-        typeFlexBox.flexWrap = FlexBox::Wrap::wrap;                   // [2]
-        typeFlexBox.justifyContent = FlexBox::JustifyContent::center; // [3]
-        typeFlexBox.alignContent = FlexBox::AlignContent::center;     // [4]
-        for (TagButton* b : TypeButtons)
-        {
-            
-            typeFlexBox.items.add (FlexItem (*b).withMinWidth (50.0f).withMinHeight (50.0f));
-        }// [5]
-        
-        typeFlexBox.performLayout (getLocalBounds().toFloat());       // [6]
+		performLayout();
     }
+
+	void performLayout()
+	{
+		//Rectangle<int> bounds = this->getLocalBounds();
+		int width = getWidth();
+
+		typeFlexBox.performLayout(Rectangle<int> (0,0,width,200));
+		characteristicFlexBox.performLayout(Rectangle<int>(0,200, width, 200));
+		bankFlexBox.performLayout(Rectangle<int>(0, 600, width, 200));
+	}
 	
 };
 struct PresetEditorPanel : public Component
@@ -132,12 +182,6 @@ public:
 	void paint(Graphics& g) override
 	{
 
-		g.fillAll(Colours::darkgrey);
-//        int x = 10, y = 50, width = getLocalBounds().getWidth() - 20, height = getLocalBounds().getHeight();
-//        Colour fillColour = Colours::white;
-//        g.setColour(fillColour);
-//        g.setFont(Font(15.00f, Font::plain).withTypefaceStyle("Regular"));
-//        g.drawMultiLineText(statusText, x, y, 812 - 20);
 	}
 
 };
@@ -152,7 +196,7 @@ struct LibraryButtonsPanel : public Component
 
 	void paint(Graphics& g) override
 	{
-		g.fillAll(Colours::brown);
+		g.fillAll(DXLookNFeel::roundBackground);
 	}
 
 };
@@ -168,34 +212,24 @@ struct LibraryButtonsPanel : public Component
 class PresetsLibrary  : public Component, public Button::Listener
 {
     DexedAudioProcessorEditor *mainWindow;
-
     File cartDir;
 	File libraryFile;
-	const int librayVersionMajor=1;
-	const int libraryVersionMinor=0;
-	const String libraryFilename = "Dexed.presets.xml";
-
-    ScopedPointer<TextButton> scanButton;
-	ScopedPointer<TextButton> factoryResetButton;
-
-
-	TagsPanel *tagsPanel;
-	LibraryPanel *libraryPanel;
-	PresetsListComponent *presetListBox;
-	PresetEditorPanel *presetEditorPanel;
+	ScopedPointer<TextButton> scanButton;
+	ScopedPointer<TextButton> factoryResetButton;	
+	PresetsListComponent *presetListBox;	
 	LibraryButtonsPanel *libraryButtonPanel;
+	String statusMessage;
     
     #ifdef DEBUG
     DocumentWindow *statusWindow;
     TextEditor *statusText;
     #endif
     
-	
-    String statusMessage;
-	
-    
 public:
     XmlElement* xmlPresetLibrary;
+	TagsPanel *tagsPanel;
+	LibraryPanel *libraryPanel;
+	PresetEditorPanel *presetEditorPanel;
     //==============================================================================
     PresetsLibrary (DexedAudioProcessorEditor *editor);
     ~PresetsLibrary();
