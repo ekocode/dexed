@@ -39,18 +39,71 @@ typedef enum
 
 class PresetsListComponent;
 
+struct TagButton : public TextButton
+{
+public:
+    TagButton(String name,int id,TagType type)
+    {
+        this->setButtonText(name);
+        this->id = id;
+        this->type = type;
+    }
+    //    void paint (Graphics& g) override
+    //    {
+    //
+    //    }
+        void resized() override
+        {
+            if (auto parent = getParentComponent())
+                parent->resized();
+        }
+    //    void drawButtonBackground (Graphics& g, Button& button, const Colour& backgroundColour,
+    //                               bool isMouseOverButton, bool isButtonDown) override
+    //    {
+    //        //...
+    //    }
+    
+    int id;
+    TagType type;
+    
+};
+
+
 struct TagsPanel : public Component
 {
-	
+    
+    FlexBox typeFlexBox;
+    
+    Array<TagButton*> TypeButtons;
 	TagsPanel()
 	{
-		
+        
 	}
+    
+    void addTypeButton(TagButton* button)
+    {
+        TypeButtons.add(button);
+    }
 
-	void paint(Graphics& g) override
-	{
-		g.fillAll(Colours::chocolate);
-	}
+//    void paint(Graphics& g) override
+//    {
+//        g.fillAll(Colours::chocolate);
+//    }
+    
+    void resized() override
+    {
+                                               // [1]
+        typeFlexBox.flexWrap = FlexBox::Wrap::wrap;                   // [2]
+        typeFlexBox.justifyContent = FlexBox::JustifyContent::center; // [3]
+        typeFlexBox.alignContent = FlexBox::AlignContent::center;     // [4]
+        for (TagButton* b : TypeButtons)
+        {
+            
+            typeFlexBox.items.add (FlexItem (*b).withMinWidth (50.0f).withMinHeight (50.0f));
+        }// [5]
+        
+        typeFlexBox.performLayout (getLocalBounds().toFloat());       // [6]
+    }
 	
 };
 struct PresetEditorPanel : public Component
@@ -103,7 +156,6 @@ struct LibraryButtonsPanel : public Component
 	}
 
 };
-
 
 //==============================================================================
 /**
@@ -161,13 +213,12 @@ public:
 							, int typeTag=-1, int bankTag=-1, Array<int> characteristicTags = Array<int>()
 							, String designer ="", String comment="", bool favorite=false, bool readOnly=false);
 	XmlElement* makeXmlTag(String name, bool readOnly = false);
+    void makeTagsButtons();
 
 
 	int loadLibrary();
 	int saveLibrary();
-    
     void scan(File dir);
-	
 	int importCart(File file);
     
     void log(String message="");

@@ -39,6 +39,7 @@ PresetsListComponent::PresetsListComponent (PresetsLibrary * presetsLibrary)
 	addAndMakeVisible(table);
 	table.setModel(this);
 
+
 	// give it a border
 	table.setColour(ListBox::outlineColourId, Colours::grey);
 	table.setOutlineThickness(1);
@@ -51,7 +52,7 @@ PresetsListComponent::PresetsListComponent (PresetsLibrary * presetsLibrary)
         table.getHeader().addColumn("Instrument", 2, width, width, width, TableHeaderComponent::defaultFlags);
         table.getHeader().addColumn("Bank", 3, width, width, width, TableHeaderComponent::defaultFlags);
         table.getHeader().addColumn("Designer", 4, width, width, width, TableHeaderComponent::defaultFlags);
-        table.getHeader().addColumn("Favorite", 5, 20, 20, 20, TableHeaderComponent::defaultFlags);
+        table.getHeader().addColumn("", 5, 20, 20, 20, TableHeaderComponent::defaultFlags); //Favorite star
 	//}
 
 	// we could now change some initial settings..
@@ -107,7 +108,7 @@ void PresetsListComponent::resized()
 {
     //[UserPreResize] Add your own custom resize code here..
     //[/UserPreResize]
-	table.setBoundsInset(BorderSize<int>(8));
+	table.setBoundsInset(BorderSize<int>(0));
     //[UserResized] Add your own custom resize handling here..
     //[/UserResized]
 }
@@ -136,12 +137,14 @@ void PresetsListComponent::paintCell(Graphics & g, int rowNumber, int columnId, 
 {
 	g.setColour(DXLookNFeel::fillColour);
 	g.setFont(font);
+    Justification::Flags justification;
+    justification = Justification::centredLeft;
     String text;
 
     if (auto* rowElement = dataList->getChildElement(rowNumber))
     {
         
-        if(columnId==2)
+        if(columnId==2) //Instrument type
         {
             auto value = rowElement->getIntAttribute(getAttributeNameForColumnId(columnId));
             if(value==-1)
@@ -154,7 +157,7 @@ void PresetsListComponent::paintCell(Graphics & g, int rowNumber, int columnId, 
             }
             
         }
-        else if(columnId==3)
+        else if(columnId==3) //Bank
         {
             auto value = rowElement->getIntAttribute(getAttributeNameForColumnId(columnId));
             if(value==-1)
@@ -168,17 +171,33 @@ void PresetsListComponent::paintCell(Graphics & g, int rowNumber, int columnId, 
             }
             
         }
+        else if(columnId==5) //favorite
+        {
+            auto value = rowElement->getIntAttribute(getAttributeNameForColumnId(columnId));
+            justification = Justification::centred;
+            if(value==0)
+            {
+                text="";
+            }
+            else
+            {
+                
+                text = "*";
+            }
+            
+        }
         else
         {
             text = rowElement->getStringAttribute(getAttributeNameForColumnId(columnId));
         }
 
-        g.drawText(text, 2, 0, width - 4, height, Justification::centredLeft, true);
+        g.drawText(text, 2, 0, width - 4, height, justification, true);
     }
 
 	
 
-	g.setColour(getLookAndFeel().findColour(ListBox::backgroundColourId));
+	//g.setColour(getLookAndFeel().findColour(ListBox::backgroundColourId));
+    g.setColour(DXLookNFeel::fillColour);
 	g.fillRect(width - 1, 0, 1, height);
 }
 

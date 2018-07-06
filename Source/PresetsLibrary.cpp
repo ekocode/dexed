@@ -79,6 +79,7 @@ PresetsLibrary::PresetsLibrary (DexedAudioProcessorEditor *editor)
     //[/Constructor]
 	loadLibrary();
 	libraryPanel->addAndMakeVisible(presetListBox = new PresetsListComponent(this));
+    makeTagsButtons();
 //    XmlElement* xml = xmlPresetLibrary->getChildByName("DEXEDLIBRARY");
 //    if(xml == nullptr)
 //    {
@@ -107,6 +108,7 @@ PresetsLibrary::~PresetsLibrary()
 		delete xmlPresetLibrary;
 	}
 	
+    tagsPanel->deleteAllChildren();
 	delete tagsPanel;
     if(presetListBox != nullptr)
     {
@@ -278,7 +280,7 @@ void PresetsLibrary::generateDefaultXml()
 	
 	uint8_t presetDatas[PROGRAM_LENGTH];
 
-	for (size_t i = 0; i < 32; i++)
+	for (int i = 0; i < 32; i++)
 	{
 		cart.unpackProgram(presetDatas, i);
 		String presetName = programNames.getReference(i);
@@ -338,12 +340,7 @@ void PresetsLibrary::scan(File dir)
 
             File file = libraryBrowserList->getFile(i);
             importCart(file);
-
-            
-
         }
-		
-
     }
     
 	libraryPanel->repaint();
@@ -390,6 +387,34 @@ int PresetsLibrary::importCart(File file)
     return rc;
     
 }
+
+void PresetsLibrary::makeTagsButtons()
+{
+    XmlElement* typeElements = (xmlPresetLibrary->getChildByName("TAGS"))->getChildByName("TYPES");
+    XmlElement* bankElements = (xmlPresetLibrary->getChildByName("TAGS"))->getChildByName("BANKS");
+    XmlElement* characteristicElements = (xmlPresetLibrary->getChildByName("TAGS"))->getChildByName("CHARACTERISTICS");
+    if(typeElements==nullptr)
+    {
+        log("null");
+    }
+    else{
+        log("nb:"+String(typeElements->getNumChildElements()));
+    }
+    TagButton* childButton;
+    int i;
+    i=0;
+    forEachXmlChildElement(*typeElements, child)
+    {
+        tagsPanel->addAndMakeVisible(childButton = new TagButton(child->getStringAttribute("name"),i,TagType::TYPE));
+        tagsPanel->addTypeButton(childButton);
+        childButton->setSize(200,50);
+        
+        //childButton->setBounds(2, 2, 200,40);
+        i++;
+    }
+
+    
+};
 
 int PresetsLibrary::loadLibrary()
 {
