@@ -89,7 +89,7 @@ PresetsListComponent::~PresetsListComponent()
 
 void PresetsListComponent::loadData(XmlElement* xmlPresetLibrary)
 {
-        dataList = xmlPresetLibrary->getChildByName("PRESETS");
+        dataList = xmlPresetLibrary->getChildByName(XML_TAG_PRESETS);
         numRows = dataList->getNumChildElements();
 	
 }
@@ -236,6 +236,10 @@ void PresetsListComponent::sortOrderChanged(int newSortColumnId, bool isForwards
 	}
 }
 
+void PresetsListComponent::selectedRowsChanged(int row)
+{
+	presetsLibrary->selectPreset(dataList->getChildElement(row));
+}
 
 //[MiscUserCode] You can add your own definitions of your custom methods or any other code here...
 

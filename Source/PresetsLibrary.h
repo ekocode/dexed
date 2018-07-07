@@ -82,7 +82,9 @@ public:
 
 			
         }
-    
+		
+		int getId() { return id; }
+		TagType getTagType() { return type; }
     int id;
     TagType type;
     
@@ -105,14 +107,26 @@ struct TagsPanel : public Component
 		typeFlexBox.justifyContent = FlexBox::JustifyContent::flexStart;
 		typeFlexBox.alignItems = FlexBox::AlignItems::flexStart;
 		typeFlexBox.flexWrap = FlexBox::Wrap::wrap;
+
+		characteristicFlexBox.alignContent = FlexBox::AlignContent::flexStart;
+		characteristicFlexBox.flexDirection = FlexBox::Direction::row;
+		characteristicFlexBox.justifyContent = FlexBox::JustifyContent::flexStart;
+		characteristicFlexBox.alignItems = FlexBox::AlignItems::flexStart;
+		characteristicFlexBox.flexWrap = FlexBox::Wrap::wrap;
+
+		bankFlexBox.alignContent = FlexBox::AlignContent::flexStart;
+		bankFlexBox.flexDirection = FlexBox::Direction::row;
+		bankFlexBox.justifyContent = FlexBox::JustifyContent::flexStart;
+		bankFlexBox.alignItems = FlexBox::AlignItems::flexStart;
+		bankFlexBox.flexWrap = FlexBox::Wrap::wrap;
 	}
     
-    void addButton(TagButton* button, TagType tagType=TagType::TYPE)
+    void addButton(TagButton* button)
     {   
 		FlexBox* destFlexBox;
 		OwnedArray<TagButton>* destOwnedArray;
 
-		switch (tagType)
+		switch (button->getTagType())
 		{
 		case TagType::TYPE:
 			destFlexBox = &typeFlexBox;
@@ -134,11 +148,6 @@ struct TagsPanel : public Component
 		flexItem.associatedComponent = button;
 		addAndMakeVisible(button);
     }
-
-    //void paint(Graphics& g) override
-    //{
-    //   // g.fillAll(Colours::chocolate);
-    //}
     
     void resized() override
     {
@@ -151,23 +160,97 @@ struct TagsPanel : public Component
 		int width = getWidth();
 
 		typeFlexBox.performLayout(Rectangle<int> (0,0,width,200));
-		characteristicFlexBox.performLayout(Rectangle<int>(0,200, width, 200));
-		bankFlexBox.performLayout(Rectangle<int>(0, 600, width, 200));
+		characteristicFlexBox.performLayout(Rectangle<int>(0,22*5, width, 200));
+		bankFlexBox.performLayout(Rectangle<int>(0, 22*12, width, 200));
 	}
 	
 };
 struct PresetEditorPanel : public Component
 {
 
-	PresetEditorPanel()
+	PresetEditorPanel(XmlElement * xmlPresetLibrary)
 	{
+		currentPreset = nullptr;
+		this->xmlPresetLibrary = xmlPresetLibrary;
 
+		name.setReadOnly(true);
+		designer.setReadOnly(true);
+		//type.setEnabled(false);
+		characteristic.setEnabled(false);
+		//bank.setEnabled(false);
+
+		addAndMakeVisible(name);
+		name.setBounds(0, 0, 100, 20);
+		addAndMakeVisible(designer);
+		designer.setBounds(0, 22, 100, 20);
+		makeComboBoxes();
+
+		addAndMakeVisible(type);
+		type.setBounds(0, 44, 100, 20);
+		//addAndMakeVisible(characteristic);
+		//characteristic.setBounds(0, 66, 100, 20);
+		addAndMakeVisible(bank);
+		bank.setBounds(0, 88, 100, 20);
 	}
+
+	void makeComboBoxes()
+	{
+		if (xmlPresetLibrary == nullptr)
+			return;
+		type.clear();
+		//characteristic.clear();
+		bank.clear();
+		
+		XmlElement* typeElements = (xmlPresetLibrary->getChildByName(XML_TAG_TAGS))->getChildByName(XML_TAG_TYPES);
+		XmlElement* bankElements = (xmlPresetLibrary->getChildByName(XML_TAG_TAGS))->getChildByName(XML_TAG_BANKS);
+		//XmlElement* characteristicElements = (xmlPresetLibrary->getChildByName(XML_TAG_TAGS))->getChildByName(XML_TAG_CHARACTERISTICS);
+		
+		int i;
+		i = 1;
+		forEachXmlChildElement(*typeElements, child)
+		{
+			
+			type.addItem(child->getStringAttribute("name"), i);
+			i++;
+		}
+		/*i = 0;
+
+		forEachXmlChildElement(*characteristicElements, child)
+		{
+			characteristic.addItem(child->getStringAttribute("designer"), i);
+			i++;
+		}*/
+		i = 1;
+		forEachXmlChildElement(*bankElements, child)
+		{
+			bank.addItem(child->getStringAttribute("name"), i);
+			i++;
+		}
+	}
+
+	void setPreset(XmlElement* preset)
+	{
+		currentPreset = preset;
+		repaint();
+	}
+
 
 	void paint(Graphics& g) override
 	{
-		g.fillAll(Colours::darkblue);
+		if (currentPreset != nullptr)
+		{
+			name.setText(currentPreset->getStringAttribute("name"));
+			designer.setText(currentPreset->getStringAttribute("designer"));
+			
+
+		}
 	}
+
+	XmlElement* currentPreset;
+	XmlElement* xmlPresetLibrary;
+	TextEditor name, designer;
+	ComboBox type, characteristic, bank;
+
 
 };
 struct LibraryPanel : public Component
@@ -176,7 +259,7 @@ public:
 	//String statusText;
 	LibraryPanel()
 	{
-
+		
 	}
 
 	void paint(Graphics& g) override
@@ -254,6 +337,7 @@ public:
 	int saveLibrary();
     void scan(File dir);
 	int importCart(File file);
+	void selectPreset(XmlElement* preset);
     
     void log(String message="");
     

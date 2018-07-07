@@ -36,12 +36,8 @@ PresetsLibrary::PresetsLibrary (DexedAudioProcessorEditor *editor)
     //[Constructor_pre] You can add your own custom stuff here..
     //[/Constructor_pre]
     mainWindow = editor;
-	
-	
-
 	xmlPresetLibrary = nullptr;
-    presetListBox = nullptr;
-	
+    presetListBox = nullptr;	
 	cartDir = DexedAudioProcessor::dexedCartDir;
 	libraryFile = DexedAudioProcessor::dexedAppDir.getChildFile(LIBRARY_FILENAME);
 	
@@ -57,7 +53,8 @@ PresetsLibrary::PresetsLibrary (DexedAudioProcessorEditor *editor)
     statusText->setTextToShowWhenEmpty("DEBUG STATUS",Colours::grey);
     statusText->setVisible(true);
 #endif
-    
+	loadLibrary();
+	
     setSize (812, 384);
 	int width = getLocalBounds().getWidth();
 	int height = getLocalBounds().getHeight();
@@ -65,12 +62,13 @@ PresetsLibrary::PresetsLibrary (DexedAudioProcessorEditor *editor)
 
 	addAndMakeVisible(tagsPanel = new TagsPanel());	
 	tagsPanel->setBounds(getLocalBounds().removeFromTop(height-toolbarHeight).removeFromLeft((width/4)));
+	
 	addAndMakeVisible(libraryPanel = new LibraryPanel());
 	libraryPanel->setBounds(getLocalBounds().removeFromTop(height - toolbarHeight).removeFromRight(width * 3 / 4).removeFromLeft(width / 2));
-	addAndMakeVisible(presetEditorPanel = new PresetEditorPanel());
+	addAndMakeVisible(presetEditorPanel = new PresetEditorPanel(xmlPresetLibrary));
 	presetEditorPanel->setBounds(getLocalBounds().removeFromTop(height - toolbarHeight).removeFromRight(width / 4));
 	addAndMakeVisible(libraryButtonPanel = new LibraryButtonsPanel());
-
+	
 
 	libraryButtonPanel->setBounds(getLocalBounds().removeFromBottom(toolbarHeight));
 	libraryButtonPanel->addAndMakeVisible(scanButton = new TextButton("Import Directory"));
@@ -80,9 +78,11 @@ PresetsLibrary::PresetsLibrary (DexedAudioProcessorEditor *editor)
 	factoryResetButton->setBounds(104, 2, 120, 30);
 	factoryResetButton->addListener(this);
     //[/Constructor]
-	loadLibrary();
+	
 	libraryPanel->addAndMakeVisible(presetListBox = new PresetsListComponent(this));
+	//presetListBox->addComponentListener(this);
     makeTagsButtons();
+	//presetEditorPanel->makeComboBoxes();
 
 	setVisible(true);
 }
@@ -164,6 +164,12 @@ void PresetsLibrary::buttonClicked(juce::Button *buttonThatWasClicked) {
 	}
 
 
+}
+
+void PresetsLibrary::selectPreset(XmlElement* preset)
+{
+	log("select preset");
+	presetEditorPanel->setPreset(preset);
 }
 
 XmlElement* PresetsLibrary::makeXmlPreset(String name, uint8_t content[PROGRAM_LENGTH]

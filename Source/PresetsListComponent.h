@@ -55,6 +55,8 @@ public:
 	void paintCell(Graphics& g, int rowNumber, int columnId,
 		int width, int height, bool /*rowIsSelected*/) override;
 	void sortOrderChanged(int newSortColumnId, bool isForwards) override;
+	void selectedRowsChanged(int row) override;
+
 
 
 private:
@@ -66,7 +68,7 @@ private:
 	XmlElement* columnList = nullptr;     // A pointer to the sub-node of demoData that contains the list of columns
 	XmlElement* dataList = nullptr;     // A pointer to the sub-node of demoData that contains the list of data rows
 	int numRows;                          // The number of rows of data we've got
-
+	OwnedArray<Button> favoriteButtons;
 	String getAttributeNameForColumnId(const int columnId) const;
 	
     //[/UserVariables]
@@ -96,6 +98,7 @@ private:
 	private:
 		String attributeToSort;
 		int direction;
+		
 	};
     //==============================================================================
 
