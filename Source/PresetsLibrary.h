@@ -313,6 +313,7 @@ public:
 	TagsPanel *tagsPanel;
 	LibraryPanel *libraryPanel;
 	PresetEditorPanel *presetEditorPanel;
+
     //==============================================================================
     PresetsLibrary (DexedAudioProcessorEditor *editor);
     ~PresetsLibrary();
@@ -338,12 +339,13 @@ public:
     void scan(File dir);
 	int importCart(File file);
 	void selectPreset(XmlElement* preset);
+	void getData(uint8_t* dest, XmlElement* preset);
     
     void log(String message="");
     
     String getTagName(int id,TagType type=CHARACTERISTIC);
-    
 
+	void setCurrentProgram(uint8_t* data);
 
 
 private:

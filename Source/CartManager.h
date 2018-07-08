@@ -50,10 +50,10 @@ class CartManager  : public Component, public Button::Listener, public DragAndDr
     ScopedPointer<TextButton> presetsLibraryButton;
     ScopedPointer<TextButton> getDXPgmButton;
     ScopedPointer<TextButton> getDXCartButton;
-    
+public:
     ScopedPointer<ProgramListBox> activeCart;
     ScopedPointer<ProgramListBox> browserCart;
-    
+private:
     ScopedPointer<FileFilter> syxFileFilter;
         
     FileTreeComponent *cartBrowser;

@@ -35,11 +35,12 @@ class DexedAudioProcessorEditor  : public AudioProcessorEditor, public ComboBox:
     MidiKeyboardComponent midiKeyboard;
     OperatorEditor operators[6];
     Colour background;
-    CartManager cartManager;
+    
 
     SharedResourcePointer<DXLookNFeel> lookAndFeel;
 public:
     DexedAudioProcessor *processor;
+	CartManager cartManager;
     GlobalEditor global;
     
     DexedAudioProcessorEditor (DexedAudioProcessor* ownerFilter);

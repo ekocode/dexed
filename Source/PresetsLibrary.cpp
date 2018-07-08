@@ -170,6 +170,9 @@ void PresetsLibrary::selectPreset(XmlElement* preset)
 {
 	log("select preset");
 	presetEditorPanel->setPreset(preset);
+	uint8_t data[PROGRAM_LENGTH];
+	getData(data, preset);
+	setCurrentProgram(data);
 }
 
 XmlElement* PresetsLibrary::makeXmlPreset(String name, uint8_t content[PROGRAM_LENGTH]
@@ -195,17 +198,16 @@ XmlElement* PresetsLibrary::makeXmlPreset(String name, uint8_t content[PROGRAM_L
 	element->setAttribute("comment", comment);
 	element->setAttribute("favorite", favorite);   
 	element->setAttribute("readOnly", readOnly);
-    
-	
-	element->addTextElement(MemoryBlock(content, PROGRAM_LENGTH).toBase64Encoding());
-
-	/*uint8_t result[PROGRAM_LENGTH];
-	MemoryBlock buffer = MemoryBlock(PROGRAM_LENGTH);
-	buffer.fromBase64Encoding(element->getAllSubText());
-	buffer.copyTo(result,0, PROGRAM_LENGTH);*/
-	
+    element->addTextElement(MemoryBlock(content, PROGRAM_LENGTH).toBase64Encoding());	
 	return element;
 
+}
+
+void PresetsLibrary::getData(uint8_t* dest, XmlElement* preset)
+{	
+	MemoryBlock buffer = MemoryBlock(PROGRAM_LENGTH);
+	buffer.fromBase64Encoding(preset->getAllSubText());
+	buffer.copyTo(dest, 0, PROGRAM_LENGTH);
 }
 
 
@@ -215,7 +217,6 @@ XmlElement* PresetsLibrary::makeXmlTag(String name, bool readOnly)
 	element->setAttribute("name", name);
 	element->setAttribute("readOnly", readOnly);
 	return element;
-
 }
 
 
@@ -400,14 +401,14 @@ void PresetsLibrary::makeTagsButtons()
     }
     
     int i;
-    i=0;
+    i=1;
     forEachXmlChildElement(*typeElements, child)
     {
          tagsPanel->addButton(new TagButton(child->getStringAttribute("name"), i, TagType::TYPE));
 
         i++;
     }
-	i = 0;
+	i = 1;
 	
 	forEachXmlChildElement(*characteristicElements, child)
 	{
@@ -415,7 +416,7 @@ void PresetsLibrary::makeTagsButtons()
 
 		i++;
 	}
-	i = 0;
+	i = 1;
 	forEachXmlChildElement(*bankElements, child)
 	{
 		tagsPanel->addButton(new TagButton(child->getStringAttribute("name"), i, TagType::BANK));
@@ -476,6 +477,17 @@ String PresetsLibrary::getTagName(int id,TagType type)
     return  (((xmlPresetLibrary->getChildByName(XML_TAG_TAGS))->getChildByName(typeString))->getChildElement(id))->getStringAttribute("name", String());
 }
 
+void PresetsLibrary::setCurrentProgram(uint8_t* data)
+{
+
+	//mainWindow->panic();
+	//mainWindow->
+	mainWindow->cartManager.activeCart->setSelected(-1);
+	mainWindow->cartManager.browserCart->setSelected(-1);
+	mainWindow->cartManager.repaint();
+	mainWindow->processor->updateProgramFromSysex((uint8_t *)data);
+	mainWindow->processor->updateHostDisplay();
+}
 
 //==============================================================================
 #if 0
