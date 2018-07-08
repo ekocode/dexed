@@ -26,6 +26,9 @@
 #include "PluginEditor.h"
 #include "CartManager.h"
 #include "PresetsListComponent.h"
+#include "PresetsLibraryPanel.h"
+#include "PresetsTagsPanel.h"
+#include "PresetEditorPanel.h"
 //[/Headers]
 
 #define PROGRAM_LENGTH 161
@@ -53,271 +56,44 @@ typedef enum
 } TagType;
 
 class PresetsListComponent;
+class PresetsTagsPanel;
+class PresetsLibraryPanel;
+class PresetEditorPanel;
+
 
 struct TagButton : public ToggleButton
 {
 public:
-    TagButton(String name,int id,TagType type)
-    {
-        this->setButtonText(name);
-        this->id = id;
-        this->type = type;
-    }
-        void paint (Graphics& g) override
-        { 
-			if (getToggleState())
-			{
-				g.setColour(DXLookNFeel::librarySelectedBackground);
-				g.fillRect(getLocalBounds());
-				g.setColour(DXLookNFeel::libraryText);
-				g.drawText(getButtonText(), getLocalBounds().toFloat(), Justification::centred);
-			}
-			else
-			{
-				g.setColour(DXLookNFeel::roundBackground);
-				g.fillRect(getLocalBounds());
-				g.setColour(DXLookNFeel::libraryDarkBackground);
-				g.drawText(getButtonText(), getLocalBounds().toFloat(), Justification::centred);
-			}
-        }
-		
+	TagButton(String name, int id, TagType type)
+	{
+		this->setButtonText(name);
+		this->id = id;
+		this->type = type;
+	}
+	void paint(Graphics& g) override
+	{
+		if (getToggleState())
+		{
+			g.setColour(DXLookNFeel::librarySelectedBackground);
+			g.fillRect(getLocalBounds());
+			g.setColour(DXLookNFeel::libraryText);
+			g.drawText(getButtonText(), getLocalBounds().toFloat(), Justification::centred);
+		}
+		else
+		{
+			g.setColour(DXLookNFeel::roundBackground);
+			g.fillRect(getLocalBounds());
+			g.setColour(DXLookNFeel::libraryDarkBackground);
+			g.drawText(getButtonText(), getLocalBounds().toFloat(), Justification::centred);
+		}
+	}
+
 	int getId() { return id; }
 	TagType getTagType() { return type; }
-    int id;
-    TagType type;    
+	int id;
+	TagType type;
 };
 
-struct TagsPanel : public Component
-{    
-    FlexBox typeFlexBox;
-	FlexBox characteristicFlexBox;
-	FlexBox bankFlexBox;    
-	OwnedArray<TagButton> typeButtons;
-	OwnedArray<TagButton> characteristicButtons;
-	OwnedArray<TagButton> bankButtons;
-
-	TagsPanel()
-	{
-		typeFlexBox.alignContent = FlexBox::AlignContent::flexStart;
-		typeFlexBox.flexDirection = FlexBox::Direction::row;
-		typeFlexBox.justifyContent = FlexBox::JustifyContent::flexStart;
-		typeFlexBox.alignItems = FlexBox::AlignItems::flexStart;
-		typeFlexBox.flexWrap = FlexBox::Wrap::wrap;
-
-		characteristicFlexBox.alignContent = FlexBox::AlignContent::flexStart;
-		characteristicFlexBox.flexDirection = FlexBox::Direction::row;
-		characteristicFlexBox.justifyContent = FlexBox::JustifyContent::flexStart;
-		characteristicFlexBox.alignItems = FlexBox::AlignItems::flexStart;
-		characteristicFlexBox.flexWrap = FlexBox::Wrap::wrap;
-
-		bankFlexBox.alignContent = FlexBox::AlignContent::flexStart;
-		bankFlexBox.flexDirection = FlexBox::Direction::row;
-		bankFlexBox.justifyContent = FlexBox::JustifyContent::flexStart;
-		bankFlexBox.alignItems = FlexBox::AlignItems::flexStart;
-		bankFlexBox.flexWrap = FlexBox::Wrap::wrap;
-	}
-    
-    void addButton(TagButton* button)
-    {   
-		FlexBox* destFlexBox;
-		OwnedArray<TagButton>* destOwnedArray;
-
-		switch (button->getTagType())
-		{
-		case TagType::TYPE:
-			destFlexBox = &typeFlexBox;
-			destOwnedArray = &typeButtons;
-			break;
-		case TagType::CHARACTERISTIC:
-			destFlexBox = &characteristicFlexBox;
-			destOwnedArray = &characteristicButtons;
-			break;
-		case TagType::BANK:
-			destFlexBox = &bankFlexBox;
-			destOwnedArray = &bankButtons;
-			break;
-		}		
-
-		destFlexBox->items.add(FlexItem((getWidth() / 3) - 2, 20).withMargin(1));
-		auto &flexItem = destFlexBox->items.getReference(destFlexBox->items.size() - 1);
-		destOwnedArray->add(button);
-		flexItem.associatedComponent = button;
-		addAndMakeVisible(button);
-    }
-    
-    void resized() override
-    {
-		performLayout();
-    }
-
-	void performLayout()
-	{
-		int width = getWidth();
-		typeFlexBox.performLayout(Rectangle<int> (0,0,width,200));
-		characteristicFlexBox.performLayout(Rectangle<int>(0,22*5, width, 200));
-		bankFlexBox.performLayout(Rectangle<int>(0, 22*12, width, 200));
-	}
-	
-};
-struct PresetEditorPanel : public Component
-{
-
-	PresetEditorPanel(XmlElement * xmlPresetLibrary)
-	{
-		currentPreset = nullptr;
-		this->xmlPresetLibrary = xmlPresetLibrary;
-
-		characteristicFlexBox.alignContent = FlexBox::AlignContent::flexStart;
-		characteristicFlexBox.flexDirection = FlexBox::Direction::row;
-		characteristicFlexBox.justifyContent = FlexBox::JustifyContent::flexStart;
-		characteristicFlexBox.alignItems = FlexBox::AlignItems::flexStart;
-		characteristicFlexBox.flexWrap = FlexBox::Wrap::wrap;
-
-		name.setReadOnly(true);
-		designer.setReadOnly(true);
-		//type.setEnabled(false);
-		//bank.setEnabled(false);
-
-		addAndMakeVisible(name);
-		name.setBounds(0, 0, 100, 20);
-		addAndMakeVisible(designer);
-		designer.setBounds(0, 22, 100, 20);
-		
-
-		addAndMakeVisible(type);
-		type.setBounds(0, 44, 100, 20);
-		type.setTextWhenNothingSelected("undefined");
-		addAndMakeVisible(bank);
-		bank.setBounds(0, 66, 100, 20);
-		bank.setTextWhenNothingSelected("undefined");
-
-		
-
-	}
-
-	void makeTags()
-	{
-		if (xmlPresetLibrary == nullptr)
-			return;
-		type.clear();
-		//characteristic.clear();
-		bank.clear();
-		
-		XmlElement* typeElements = (xmlPresetLibrary->getChildByName(XML_TAG_TAGS))->getChildByName(XML_TAG_TYPES);
-		XmlElement* bankElements = (xmlPresetLibrary->getChildByName(XML_TAG_TAGS))->getChildByName(XML_TAG_BANKS);
-		XmlElement* characteristicElements = (xmlPresetLibrary->getChildByName(XML_TAG_TAGS))->getChildByName(XML_TAG_CHARACTERISTICS);
-		
-		
-		int i;
-		i = 1; //offset because combobox can't handle 0
-		forEachXmlChildElement(*typeElements, child)
-		{			
-			type.addItem(child->getStringAttribute("name"), i);
-			i++;
-		}
-		i = 0;
-		forEachXmlChildElement(*characteristicElements, child)
-		{
-			addButton(new TagButton(child->getStringAttribute("name"), i, TagType::CHARACTERISTIC));
-			i++;
-		}
-		
-		i = 1; //offset because combobox can't handle 0
-		forEachXmlChildElement(*bankElements, child)
-		{
-			bank.addItem(child->getStringAttribute("name"), i);
-			i++;
-		}
-		performLayout();
-	}
-
-	void setPreset(XmlElement* preset)
-	{
-		currentPreset = preset;
-		setFilters();
-		repaint();
-	}
-
-	void refreshFilters()
-	{
-
-	}
-
-	void setFilters()
-	{
-		int bankValue = currentPreset->getIntAttribute("bank");
-		int typeValue = currentPreset->getIntAttribute("type");
-		
-		if (bankValue > -1)
-		{
-			bank.setSelectedId(bankValue+1);
-		}
-		else
-		{
-			bank.setSelectedId(0);
-		}
-
-		if (typeValue > -1)
-		{
-			bank.setSelectedId(typeValue+1);
-		}
-		else
-		{
-			bank.setSelectedId(0);
-		}
-	}
-
-	void paint(Graphics& g) override
-	{
-		if (currentPreset != nullptr)
-		{
-			name.setText(currentPreset->getStringAttribute("name"));
-			designer.setText(currentPreset->getStringAttribute("designer"));
-		}
-	}
-
-	void resized() override
-	{
-		performLayout();
-	}
-
-	void performLayout()
-	{
-		int width = getWidth();
-		characteristicFlexBox.performLayout(Rectangle<int>(0, 100, width, 200));
-	}
-
-	void addButton(TagButton* button)
-	{
-		characteristicFlexBox.items.add(FlexItem((getWidth() / 3) - 2, 20).withMargin(1));
-		auto &flexItem = characteristicFlexBox.items.getReference(characteristicFlexBox.items.size() - 1);
-		characteristicButtons.add(button);
-		flexItem.associatedComponent = button;
-		addAndMakeVisible(button);
-	}
-
-	XmlElement* currentPreset;
-	XmlElement* xmlPresetLibrary;
-	FlexBox characteristicFlexBox;
-	OwnedArray<TagButton> characteristicButtons;
-	TextEditor name, designer;
-	ComboBox type, bank;
-};
-
-struct LibraryPanel : public Component
-{
-public:
-	//String statusText;
-	LibraryPanel()
-	{
-		
-	}
-
-	void paint(Graphics& g) override
-	{
-
-	}
-};
 
 struct LibraryButtonsPanel : public Component
 {
@@ -360,8 +136,8 @@ class PresetsLibrary  : public Component, public Button::Listener
     
 public:
     XmlElement* xmlPresetLibrary;
-	TagsPanel *tagsPanel;
-	LibraryPanel *libraryPanel;
+	PresetsTagsPanel *tagsPanel;
+	PresetsLibraryPanel *libraryPanel;
 	PresetEditorPanel *presetEditorPanel;
 
     //==============================================================================
@@ -389,9 +165,14 @@ public:
     void scan(File dir);
 	int importCart(File file);
 	void selectPreset(XmlElement* preset);
-	void getData(uint8_t* dest, XmlElement* preset);
-    
+	static void changeSysexProgramName(uint8* program,String newName);
+	//void savePreset(XmlElement* preset);
+	static void getDataFromPreset(uint8_t* destData, XmlElement* sourcePreset);
+	static void setDataToPreset(uint8_t* sourceData, XmlElement* destPreset);
+	static void setPresetName(XmlElement* preset, String newName);
     void log(String message="");
+
+	static String dataToString(const uint8_t* data);
     
     String getTagName(int id,TagType type=CHARACTERISTIC);
 

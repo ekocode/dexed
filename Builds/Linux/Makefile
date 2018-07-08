@@ -97,6 +97,9 @@ OBJECTS_SHARED_CODE := \
   $(JUCE_OBJDIR)/PluginFx_d84f776e.o \
   $(JUCE_OBJDIR)/EngineMkI_615efdaa.o \
   $(JUCE_OBJDIR)/EngineOpl_d5a0e5ea.o \
+  $(JUCE_OBJDIR)/PresetsTagsPanel_a779b960.o \
+  $(JUCE_OBJDIR)/PresetsLibraryPanel_3a1d097e.o \
+  $(JUCE_OBJDIR)/PresetEditorPanel_eaf5b599.o \
   $(JUCE_OBJDIR)/PresetsListComponent_6bc1bff4.o \
   $(JUCE_OBJDIR)/PresetsLibrary_ed69d8b0.o \
   $(JUCE_OBJDIR)/PluginEditor_94d4fb09.o \
@@ -187,6 +190,21 @@ $(JUCE_OBJDIR)/EngineMkI_615efdaa.o: ../../Source/EngineMkI.cpp
 $(JUCE_OBJDIR)/EngineOpl_d5a0e5ea.o: ../../Source/EngineOpl.cpp
 	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
 	@echo "Compiling EngineOpl.cpp"
+	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_SHARED_CODE) $(JUCE_CFLAGS_SHARED_CODE) -o "$@" -c "$<"
+
+$(JUCE_OBJDIR)/PresetsTagsPanel_a779b960.o: ../../Source/PresetsTagsPanel.cpp
+	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
+	@echo "Compiling PresetsTagsPanel.cpp"
+	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_SHARED_CODE) $(JUCE_CFLAGS_SHARED_CODE) -o "$@" -c "$<"
+
+$(JUCE_OBJDIR)/PresetsLibraryPanel_3a1d097e.o: ../../Source/PresetsLibraryPanel.cpp
+	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
+	@echo "Compiling PresetsLibraryPanel.cpp"
+	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_SHARED_CODE) $(JUCE_CFLAGS_SHARED_CODE) -o "$@" -c "$<"
+
+$(JUCE_OBJDIR)/PresetEditorPanel_eaf5b599.o: ../../Source/PresetEditorPanel.cpp
+	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
+	@echo "Compiling PresetEditorPanel.cpp"
 	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_SHARED_CODE) $(JUCE_CFLAGS_SHARED_CODE) -o "$@" -c "$<"
 
 $(JUCE_OBJDIR)/PresetsListComponent_6bc1bff4.o: ../../Source/PresetsListComponent.cpp

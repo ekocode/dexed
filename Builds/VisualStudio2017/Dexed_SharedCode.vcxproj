@@ -154,6 +154,9 @@
     <ClCompile Include="..\..\Source\PluginFx.cpp"/>
     <ClCompile Include="..\..\Source\EngineMkI.cpp"/>
     <ClCompile Include="..\..\Source\EngineOpl.cpp"/>
+    <ClCompile Include="..\..\Source\PresetsTagsPanel.cpp"/>
+    <ClCompile Include="..\..\Source\PresetsLibraryPanel.cpp"/>
+    <ClCompile Include="..\..\Source\PresetEditorPanel.cpp"/>
     <ClCompile Include="..\..\Source\PresetsListComponent.cpp"/>
     <ClCompile Include="..\..\Source\PresetsLibrary.cpp"/>
     <ClCompile Include="..\..\Source\PluginEditor.cpp"/>
@@ -1855,6 +1858,9 @@
     <ClInclude Include="..\..\Source\PluginFx.h"/>
     <ClInclude Include="..\..\Source\EngineMkI.h"/>
     <ClInclude Include="..\..\Source\EngineOpl.h"/>
+    <ClInclude Include="..\..\Source\PresetsTagsPanel.h"/>
+    <ClInclude Include="..\..\Source\PresetsLibraryPanel.h"/>
+    <ClInclude Include="..\..\Source\PresetEditorPanel.h"/>
     <ClInclude Include="..\..\Source\PresetsListComponent.h"/>
     <ClInclude Include="..\..\Source\PresetsLibrary.h"/>
     <ClInclude Include="..\..\Source\PluginEditor.h"/>

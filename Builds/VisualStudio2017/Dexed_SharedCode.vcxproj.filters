@@ -376,6 +376,15 @@
     <ClCompile Include="..\..\Source\EngineOpl.cpp">
       <Filter>Dexed\Source\dsp</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\PresetsTagsPanel.cpp">
+      <Filter>Dexed\Source\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\PresetsLibraryPanel.cpp">
+      <Filter>Dexed\Source\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\PresetEditorPanel.cpp">
+      <Filter>Dexed\Source\ui</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\Source\PresetsListComponent.cpp">
       <Filter>Dexed\Source\ui</Filter>
     </ClCompile>
@@ -2273,6 +2282,15 @@
     </ClInclude>
     <ClInclude Include="..\..\Source\EngineOpl.h">
       <Filter>Dexed\Source\dsp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\PresetsTagsPanel.h">
+      <Filter>Dexed\Source\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\PresetsLibraryPanel.h">
+      <Filter>Dexed\Source\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\PresetEditorPanel.h">
+      <Filter>Dexed\Source\ui</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\PresetsListComponent.h">
       <Filter>Dexed\Source\ui</Filter>

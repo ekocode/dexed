@@ -52,6 +52,18 @@
         <FILE id="TF7JMc" name="EngineOpl.h" compile="0" resource="0" file="Source/EngineOpl.h"/>
       </GROUP>
       <GROUP id="{998D2187-B355-9C12-0FB2-2D048B83342D}" name="ui">
+        <FILE id="G1M9tE" name="PresetsTagsPanel.cpp" compile="1" resource="0"
+              file="Source/PresetsTagsPanel.cpp"/>
+        <FILE id="RAUZlv" name="PresetsTagsPanel.h" compile="0" resource="0"
+              file="Source/PresetsTagsPanel.h"/>
+        <FILE id="iYjAZK" name="PresetsLibraryPanel.cpp" compile="1" resource="0"
+              file="Source/PresetsLibraryPanel.cpp"/>
+        <FILE id="SwaLH2" name="PresetsLibraryPanel.h" compile="0" resource="0"
+              file="Source/PresetsLibraryPanel.h"/>
+        <FILE id="h6Z0fk" name="PresetEditorPanel.cpp" compile="1" resource="0"
+              file="Source/PresetEditorPanel.cpp"/>
+        <FILE id="gjbDba" name="PresetEditorPanel.h" compile="0" resource="0"
+              file="Source/PresetEditorPanel.h"/>
         <FILE id="Biy6ym" name="PresetsListComponent.cpp" compile="1" resource="0"
               file="Source/PresetsListComponent.cpp"/>
         <FILE id="HVR4Yd" name="PresetsListComponent.h" compile="0" resource="0"

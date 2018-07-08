@@ -60,12 +60,12 @@ PresetsLibrary::PresetsLibrary (DexedAudioProcessorEditor *editor)
 	int height = getLocalBounds().getHeight();
 	int toolbarHeight = 34;
 
-	addAndMakeVisible(tagsPanel = new TagsPanel());	
+	addAndMakeVisible(tagsPanel = new PresetsTagsPanel());	
 	tagsPanel->setBounds(getLocalBounds().removeFromTop(height-toolbarHeight).removeFromLeft((width/4)));
 	
-	addAndMakeVisible(libraryPanel = new LibraryPanel());
+	addAndMakeVisible(libraryPanel = new PresetsLibraryPanel());
 	libraryPanel->setBounds(getLocalBounds().removeFromTop(height - toolbarHeight).removeFromRight(width * 3 / 4).removeFromLeft(width / 2));
-	addAndMakeVisible(presetEditorPanel = new PresetEditorPanel(xmlPresetLibrary));
+	addAndMakeVisible(presetEditorPanel = new PresetEditorPanel(this));
 	presetEditorPanel->setBounds(getLocalBounds().removeFromTop(height - toolbarHeight).removeFromRight(width / 4));
 	
 	addAndMakeVisible(libraryButtonPanel = new LibraryButtonsPanel());
@@ -170,12 +170,39 @@ void PresetsLibrary::buttonClicked(juce::Button *buttonThatWasClicked) {
 
 void PresetsLibrary::selectPreset(XmlElement* preset)
 {
-	log("select preset");
+	//log("select preset###############");
 	presetEditorPanel->setPreset(preset);
 	uint8_t data[PROGRAM_LENGTH];
-	getData(data, preset);
+	getDataFromPreset(data, preset);
+	/*log("###########");
+	log(dataToString(data));
+	log("###########");*/
 	setCurrentProgram(data);
 }
+
+void PresetsLibrary::changeSysexProgramName(uint8 * program,String newName)
+{
+	int eos = 0;
+
+	newName = newName+"          ";
+	for (int i = 0; i < 10; i++) {
+		char c = (char)newName[i];
+		if (c == 0)
+			eos = 1;
+		if (eos) {
+			program[145 + i] = ' ';
+			continue;
+		}
+		c = c < 32 ? ' ' : c;
+		c = c > 127 ? ' ' : c;
+		program[145 + i] = c;
+	}
+}
+
+//void PresetsLibrary::savePreset(XmlElement * preset)
+//{
+//
+//}
 
 XmlElement* PresetsLibrary::makeXmlPreset(String name, uint8_t content[PROGRAM_LENGTH]
 										,int typeTag, int bankTag, Array<int> characteristicTags
@@ -200,18 +227,41 @@ XmlElement* PresetsLibrary::makeXmlPreset(String name, uint8_t content[PROGRAM_L
 	element->setAttribute("comment", comment);
 	element->setAttribute("favorite", favorite);   
 	element->setAttribute("readOnly", readOnly);
-    element->addTextElement(MemoryBlock(content, PROGRAM_LENGTH).toBase64Encoding());	
+    element->addTextElement(MemoryBlock(content, PROGRAM_LENGTH).toBase64Encoding());
+	setDataToPreset(content, element);
 	return element;
 
 }
 
-void PresetsLibrary::getData(uint8_t* dest, XmlElement* preset)
+void PresetsLibrary::getDataFromPreset(uint8_t* destData, XmlElement* sourcePreset)
 {	
 	MemoryBlock buffer = MemoryBlock(PROGRAM_LENGTH);
-	buffer.fromBase64Encoding(preset->getAllSubText());
-	buffer.copyTo(dest, 0, PROGRAM_LENGTH);
+	buffer.fromBase64Encoding(sourcePreset->getAllSubText());
+	buffer.copyTo(destData, 0, PROGRAM_LENGTH);
 }
 
+void PresetsLibrary::setDataToPreset(uint8_t * sourceData, XmlElement * destPreset)
+{
+	destPreset->deleteAllTextElements();
+	destPreset->addTextElement(MemoryBlock(sourceData, PROGRAM_LENGTH).toBase64Encoding());
+}
+
+void PresetsLibrary::setPresetName(XmlElement * preset, String newName)
+{
+	preset->setAttribute("name", newName);
+	uint8_t data[PROGRAM_LENGTH];
+	
+	getDataFromPreset(data, preset);
+	/*log("########### before change name");
+	log(dataToString(data));
+	log("###########");*/
+	changeSysexProgramName(data, newName);
+	/*log("########### after change name");
+	log(dataToString(data));
+	log("###########");*/
+	setDataToPreset(data, preset);
+
+}
 
 XmlElement* PresetsLibrary::makeXmlTag(String name, bool readOnly)
 {
@@ -219,6 +269,16 @@ XmlElement* PresetsLibrary::makeXmlTag(String name, bool readOnly)
 	element->setAttribute("name", name);
 	element->setAttribute("readOnly", readOnly);
 	return element;
+}
+
+String PresetsLibrary::dataToString(const uint8_t * data)
+{
+	String output;
+	for (int i = 0; i < PROGRAM_LENGTH; i++)
+	{
+		output += String::formatted("%c",data[i]);
+	}
+	return output;
 }
 
 
@@ -300,7 +360,7 @@ void PresetsLibrary::generateDefaultXml()
 	libraryFile.create();
 	libraryFile.appendText(xmlPresetLibrary->createDocument(String()));
 
-	log((xmlPresetLibrary->getChildByName(XML_TAG_LIBRARY))->createDocument(String()));
+	//log((xmlPresetLibrary->getChildByName(XML_TAG_LIBRARY))->createDocument(String()));
 
 }
 //[MiscUserCode] You can add your own definitions of your custom methods or any other code here...
@@ -398,7 +458,7 @@ void PresetsLibrary::makeTagsButtons()
         log("null");
     }
     else{
-        log("nb:"+String(characteristicElements->getNumChildElements()));
+       // log("nb:"+String(characteristicElements->getNumChildElements()));
     }
     
     int i;
