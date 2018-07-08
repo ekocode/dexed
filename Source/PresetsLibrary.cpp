@@ -67,6 +67,7 @@ PresetsLibrary::PresetsLibrary (DexedAudioProcessorEditor *editor)
 	libraryPanel->setBounds(getLocalBounds().removeFromTop(height - toolbarHeight).removeFromRight(width * 3 / 4).removeFromLeft(width / 2));
 	addAndMakeVisible(presetEditorPanel = new PresetEditorPanel(xmlPresetLibrary));
 	presetEditorPanel->setBounds(getLocalBounds().removeFromTop(height - toolbarHeight).removeFromRight(width / 4));
+	
 	addAndMakeVisible(libraryButtonPanel = new LibraryButtonsPanel());
 	
 
@@ -82,6 +83,7 @@ PresetsLibrary::PresetsLibrary (DexedAudioProcessorEditor *editor)
 	libraryPanel->addAndMakeVisible(presetListBox = new PresetsListComponent(this));
 	//presetListBox->addComponentListener(this);
     makeTagsButtons();
+	presetEditorPanel->makeTags();
 	//presetEditorPanel->makeComboBoxes();
 
 	setVisible(true);
@@ -376,7 +378,6 @@ int PresetsLibrary::importCart(File file)
     
     for(int j=0; j<programNames.size(); j++)
     {
-        
 		log(programNames.getReference(j));
         uint8_t unpackPgm[PROGRAM_LENGTH];
         cart.unpackProgram(unpackPgm,j);
@@ -401,26 +402,23 @@ void PresetsLibrary::makeTagsButtons()
     }
     
     int i;
-    i=1;
+    i=0;
     forEachXmlChildElement(*typeElements, child)
     {
-         tagsPanel->addButton(new TagButton(child->getStringAttribute("name"), i, TagType::TYPE));
-
+        tagsPanel->addButton(new TagButton(child->getStringAttribute("name"), i, TagType::TYPE));
         i++;
     }
-	i = 1;
+	i = 0;
 	
 	forEachXmlChildElement(*characteristicElements, child)
 	{
 		tagsPanel->addButton(new TagButton(child->getStringAttribute("name"), i, TagType::CHARACTERISTIC));
-
 		i++;
 	}
-	i = 1;
+	i = 0;
 	forEachXmlChildElement(*bankElements, child)
 	{
 		tagsPanel->addButton(new TagButton(child->getStringAttribute("name"), i, TagType::BANK));
-
 		i++;
 	}
 	tagsPanel->performLayout();
@@ -479,9 +477,6 @@ String PresetsLibrary::getTagName(int id,TagType type)
 
 void PresetsLibrary::setCurrentProgram(uint8_t* data)
 {
-
-	//mainWindow->panic();
-	//mainWindow->
 	mainWindow->cartManager.activeCart->setSelected(-1);
 	mainWindow->cartManager.browserCart->setSelected(-1);
 	mainWindow->cartManager.repaint();
