@@ -35,11 +35,11 @@ PresetEditorPanel::PresetEditorPanel (PresetsLibrary* presetLibrary)
 	this->presetLibrary = presetLibrary;
 	xmlPresetLibrary = presetLibrary->xmlPresetLibrary;
 
-	characteristicFlexBox.alignContent = FlexBox::AlignContent::flexStart;
-	characteristicFlexBox.flexDirection = FlexBox::Direction::row;
-	characteristicFlexBox.justifyContent = FlexBox::JustifyContent::flexStart;
-	characteristicFlexBox.alignItems = FlexBox::AlignItems::flexStart;
-	characteristicFlexBox.flexWrap = FlexBox::Wrap::wrap;
+	editCharacteristicFlexBox.alignContent = FlexBox::AlignContent::flexStart;
+	editCharacteristicFlexBox.flexDirection = FlexBox::Direction::row;
+	editCharacteristicFlexBox.justifyContent = FlexBox::JustifyContent::flexStart;
+	editCharacteristicFlexBox.alignItems = FlexBox::AlignItems::flexStart;
+	editCharacteristicFlexBox.flexWrap = FlexBox::Wrap::wrap;
 
 	//name.setReadOnly(true);
 	//designer.setReadOnly(true);
@@ -177,7 +177,7 @@ void PresetEditorPanel::savePreset()
     currentPreset->setAttribute("typeTag", type.getSelectedId() - 1);
     
     //ScopedPointer<OwnedArray<TagButton>>pcharacteristicButtons = &characteristicButtons;
-    //getTagsButtonsState(pcharacteristicButtons);
+    //getTagsButtonsState(&editCharacteristicButtons);
     //presetLibrary->arrayToXml(getTagsButtonsState(characteristicButtons));
     presetLibrary->selectPreset(currentPreset);
     //presetLibrary->log("_CLEAR");
@@ -185,7 +185,7 @@ void PresetEditorPanel::savePreset()
     presetLibrary->repaint();
 }
 
-Array<int> getTagsButtonsState(ScopedPointer<OwnedArray<TagButton>> tagsButtons )
+Array<int> getTagsButtonsState(ScopedPointer<OwnedArray<TagButton>> tagsButtonsOK )
 {
     TagButton* button;
     Array<int> output;
@@ -256,14 +256,14 @@ void PresetEditorPanel::setTags()
 void PresetEditorPanel::performLayout()
 {
     int width = getWidth();
-    characteristicFlexBox.performLayout(Rectangle<int>(0, 100, width, 200));
+    editCharacteristicFlexBox.performLayout(Rectangle<int>(0, 100, width, 200));
 }
 
 void PresetEditorPanel::addButton(TagButton * button)
 {
-    characteristicFlexBox.items.add(FlexItem((getWidth() / 3) - 2, 20).withMargin(1));
-    auto &flexItem = characteristicFlexBox.items.getReference(characteristicFlexBox.items.size() - 1);
-    characteristicButtons.add(button);
+    editCharacteristicFlexBox.items.add(FlexItem((getWidth() / 3) - 2, 20).withMargin(1));
+    auto &flexItem = editCharacteristicFlexBox.items.getReference(editCharacteristicFlexBox.items.size() - 1);
+    editCharacteristicButtons.add(button);
     flexItem.associatedComponent = button;
     addAndMakeVisible(button);
     //button->addListener(this);
