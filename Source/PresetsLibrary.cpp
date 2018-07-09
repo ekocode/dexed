@@ -34,7 +34,7 @@
 PresetsLibrary::PresetsLibrary (DexedAudioProcessorEditor *editor)
 {
     //[Constructor_pre] You can add your own custom stuff here..
-    //[/Constructor_pre]
+    
     mainWindow = editor;
 	xmlPresetLibrary = nullptr;
     presetListBox = nullptr;	
@@ -54,32 +54,35 @@ PresetsLibrary::PresetsLibrary (DexedAudioProcessorEditor *editor)
     statusText->setVisible(true);
 #endif
 	loadLibrary();
-	
+    
+    //[/Constructor_pre]
+    
     setSize (812, 384);
-	int width = getLocalBounds().getWidth();
-	int height = getLocalBounds().getHeight();
-	int toolbarHeight = 34;
-
-	addAndMakeVisible(tagsPanel = new PresetsTagsPanel());	
-	tagsPanel->setBounds(getLocalBounds().removeFromTop(height-toolbarHeight).removeFromLeft((width/4)));
-	
-	addAndMakeVisible(libraryPanel = new PresetsLibraryPanel());
-	libraryPanel->setBounds(getLocalBounds().removeFromTop(height - toolbarHeight).removeFromRight(width * 3 / 4).removeFromLeft(width / 2));
-	addAndMakeVisible(presetEditorPanel = new PresetEditorPanel(this));
-	presetEditorPanel->setBounds(getLocalBounds().removeFromTop(height - toolbarHeight).removeFromRight(width / 4));
-	
-	addAndMakeVisible(libraryButtonPanel = new LibraryButtonsPanel());
-	
-
-	libraryButtonPanel->setBounds(getLocalBounds().removeFromBottom(toolbarHeight));
-	libraryButtonPanel->addAndMakeVisible(scanButton = new TextButton("Import Directory"));
-	scanButton->setBounds(2, 2, 100, 30);
-	scanButton->addListener(this);
-	libraryButtonPanel->addAndMakeVisible(factoryResetButton = new TextButton("Reset Presets Lib"));
-	factoryResetButton->setBounds(104, 2, 120, 30);
-	factoryResetButton->addListener(this);
-    //[/Constructor]
-	
+    
+	//[Constructor] You can add your own custom stuff here..
+    int width = getLocalBounds().getWidth();
+    int height = getLocalBounds().getHeight();
+    int toolbarHeight = 34;
+    
+    addAndMakeVisible(tagsPanel = new PresetsTagsPanel());
+    tagsPanel->setBounds(getLocalBounds().removeFromTop(height-toolbarHeight).removeFromLeft((width/4)));
+    
+    addAndMakeVisible(libraryPanel = new PresetsLibraryPanel());
+    libraryPanel->setBounds(getLocalBounds().removeFromTop(height - toolbarHeight).removeFromRight(width * 3 / 4).removeFromLeft(width / 2));
+    addAndMakeVisible(presetEditorPanel = new PresetEditorPanel(this));
+    presetEditorPanel->setBounds(getLocalBounds().removeFromTop(height - toolbarHeight).removeFromRight(width / 4));
+    
+    addAndMakeVisible(libraryButtonPanel = new LibraryButtonsPanel());
+    
+    
+    libraryButtonPanel->setBounds(getLocalBounds().removeFromBottom(toolbarHeight));
+    libraryButtonPanel->addAndMakeVisible(scanButton = new TextButton("Import Directory"));
+    scanButton->setBounds(2, 2, 100, 30);
+    scanButton->addListener(this);
+    libraryButtonPanel->addAndMakeVisible(factoryResetButton = new TextButton("Reset Presets Lib"));
+    factoryResetButton->setBounds(104, 2, 120, 30);
+    factoryResetButton->addListener(this);
+    
 	libraryPanel->addAndMakeVisible(presetListBox = new PresetsListComponent(this));
 	//presetListBox->addComponentListener(this);
     makeTagsButtons();
@@ -87,33 +90,35 @@ PresetsLibrary::PresetsLibrary (DexedAudioProcessorEditor *editor)
 	//presetEditorPanel->makeComboBoxes();
 
 	setVisible(true);
+    //[/Constructor]
 }
 
 PresetsLibrary::~PresetsLibrary()
 {
     //[Destructor_pre]. You can add your own custom destruction code here..
-    //[/Destructor_pre]
 #ifdef DEBUG
     //statusWindow->deleteAllChildren();
     delete statusText;
     delete statusWindow;
     
 #endif
-	if (xmlPresetLibrary != nullptr)
-	{
-		delete xmlPresetLibrary;
-	}
-	
+    if (xmlPresetLibrary != nullptr)
+    {
+        delete xmlPresetLibrary;
+    }
+    
     //tagsPanel->deleteAllChildren();
-	delete tagsPanel;
+    delete tagsPanel;
     if(presetListBox != nullptr)
     {
         delete presetListBox;
     }
-	
-	delete libraryPanel;
-	delete presetEditorPanel;
-	delete libraryButtonPanel;	
+    
+    delete libraryPanel;
+    delete presetEditorPanel;
+    delete libraryButtonPanel;    
+    //[/Destructor_pre]
+
 
     //[Destructor]. You can add your own custom destruction code here..
     //[/Destructor]
@@ -140,6 +145,7 @@ void PresetsLibrary::resized()
     //[/UserResized]
 }
 
+//[MiscUserCode] You can add your own definitions of your custom methods or any other code here...
 
 void PresetsLibrary::buttonClicked(juce::Button *buttonThatWasClicked) {
 
@@ -271,6 +277,28 @@ XmlElement* PresetsLibrary::makeXmlTag(String name, bool readOnly)
 	return element;
 }
 
+String PresetsLibrary::arrayToXml(Array<int> array)
+{
+    String output;
+    for (int i=0; i<array.size(); i++) {
+        if(i!=0)
+           output += " ";
+        
+        output+= String(array[i]);
+    }
+    return output;
+}
+Array<int> PresetsLibrary::xmlToArray(String xmlArray)
+{
+    StringArray buffer;
+    Array<int> output;
+    buffer.addTokens(xmlArray, " ");
+    for (int i=0; i<buffer.size(); i++) {
+        output.add(buffer.getReference(i).getIntValue());
+    }
+    return output;
+}
+
 String PresetsLibrary::dataToString(const uint8_t * data)
 {
 	String output;
@@ -363,8 +391,7 @@ void PresetsLibrary::generateDefaultXml()
 	//log((xmlPresetLibrary->getChildByName(XML_TAG_LIBRARY))->createDocument(String()));
 
 }
-//[MiscUserCode] You can add your own definitions of your custom methods or any other code here...
-//[/MiscUserCode]
+
 
 void PresetsLibrary::scan(File dir)
 {
@@ -543,6 +570,7 @@ void PresetsLibrary::setCurrentProgram(uint8_t* data)
 	mainWindow->processor->updateProgramFromSysex((uint8_t *)data);
 	mainWindow->processor->updateHostDisplay();
 }
+//[/MiscUserCode]
 
 //==============================================================================
 #if 0

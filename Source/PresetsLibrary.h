@@ -29,7 +29,6 @@
 #include "PresetsLibraryPanel.h"
 #include "PresetsTagsPanel.h"
 #include "PresetEditorPanel.h"
-//[/Headers]
 
 #define PROGRAM_LENGTH 161
 
@@ -64,51 +63,54 @@ class PresetEditorPanel;
 struct TagButton : public ToggleButton
 {
 public:
-	TagButton(String name, int id, TagType type)
-	{
-		this->setButtonText(name);
-		this->id = id;
-		this->type = type;
-	}
-	void paint(Graphics& g) override
-	{
-		if (getToggleState())
-		{
-			g.setColour(DXLookNFeel::librarySelectedBackground);
-			g.fillRect(getLocalBounds());
-			g.setColour(DXLookNFeel::libraryText);
-			g.drawText(getButtonText(), getLocalBounds().toFloat(), Justification::centred);
-		}
-		else
-		{
-			g.setColour(DXLookNFeel::roundBackground);
-			g.fillRect(getLocalBounds());
-			g.setColour(DXLookNFeel::libraryDarkBackground);
-			g.drawText(getButtonText(), getLocalBounds().toFloat(), Justification::centred);
-		}
-	}
-
-	int getId() { return id; }
-	TagType getTagType() { return type; }
-	int id;
-	TagType type;
+    TagButton(String name, int id, TagType type)
+    {
+        this->setButtonText(name);
+        this->id = id;
+        this->type = type;
+    }
+    void paint(Graphics& g) override
+    {
+        if (getToggleState())
+        {
+            g.setColour(DXLookNFeel::librarySelectedBackground);
+            g.fillRect(getLocalBounds());
+            g.setColour(DXLookNFeel::libraryText);
+            g.drawText(getButtonText(), getLocalBounds().toFloat(), Justification::centred);
+        }
+        else
+        {
+            g.setColour(DXLookNFeel::roundBackground);
+            g.fillRect(getLocalBounds());
+            g.setColour(DXLookNFeel::libraryDarkBackground);
+            g.drawText(getButtonText(), getLocalBounds().toFloat(), Justification::centred);
+        }
+    }
+    
+    int getId() { return id; }
+    TagType getTagType() { return type; }
+    int id;
+    TagType type;
 };
 
 
 struct LibraryButtonsPanel : public Component
 {
-
-	LibraryButtonsPanel()
-	{
-
-	}
-
-	void paint(Graphics& g) override
-	{
-		g.fillAll(DXLookNFeel::roundBackground);
-	}
-
+    
+    LibraryButtonsPanel()
+    {
+        
+    }
+    
+    void paint(Graphics& g) override
+    {
+        g.fillAll(DXLookNFeel::roundBackground);
+    }
+    
 };
+
+//[/Headers]
+
 
 //==============================================================================
 /**
@@ -120,25 +122,10 @@ struct LibraryButtonsPanel : public Component
 */
 class PresetsLibrary  : public Component, public Button::Listener
 {
-    DexedAudioProcessorEditor *mainWindow;
-    File cartDir;
-	File libraryFile;
-	ScopedPointer<TextButton> scanButton;
-	ScopedPointer<TextButton> factoryResetButton;	
-	PresetsListComponent *presetListBox;	
-	LibraryButtonsPanel *libraryButtonPanel;
-	String statusMessage;
     
-    #ifdef DEBUG
-    DocumentWindow *statusWindow;
-    TextEditor *statusText;
-    #endif
     
 public:
-    XmlElement* xmlPresetLibrary;
-	PresetsTagsPanel *tagsPanel;
-	PresetsLibraryPanel *libraryPanel;
-	PresetEditorPanel *presetEditorPanel;
+    
 
     //==============================================================================
     PresetsLibrary (DexedAudioProcessorEditor *editor);
@@ -146,7 +133,10 @@ public:
 
     //==============================================================================
     //[UserMethods]     -- You can add your own custom methods in this section.
-    //[/UserMethods]
+    XmlElement* xmlPresetLibrary;
+    PresetsTagsPanel *tagsPanel;
+    PresetsLibraryPanel *libraryPanel;
+    PresetEditorPanel *presetEditorPanel;
 
     void paint (Graphics& g) override;
     void resized() override;
@@ -157,30 +147,48 @@ public:
 							, int typeTag=-1, int bankTag=-1, Array<int> characteristicTags = Array<int>()
 							, String designer ="", String comment="", bool favorite=false, bool readOnly=false);
 	XmlElement* makeXmlTag(String name, bool readOnly = false);
+    static String arrayToXml(Array<int> array);
+    static Array<int> xmlToArray(String xmlArray);
+    
     void makeTagsButtons();
-
+    String getTagName(int id,TagType type=CHARACTERISTIC);
 
 	int loadLibrary();
 	int saveLibrary();
     void scan(File dir);
 	int importCart(File file);
+    
+   
+    
+    
 	void selectPreset(XmlElement* preset);
 	static void changeSysexProgramName(uint8* program,String newName);
 	//void savePreset(XmlElement* preset);
 	static void getDataFromPreset(uint8_t* destData, XmlElement* sourcePreset);
 	static void setDataToPreset(uint8_t* sourceData, XmlElement* destPreset);
 	static void setPresetName(XmlElement* preset, String newName);
+
+	
+    void setCurrentProgram(uint8_t* data);
+    static String dataToString(const uint8_t* data);
+
     void log(String message="");
-
-	static String dataToString(const uint8_t* data);
-    
-    String getTagName(int id,TagType type=CHARACTERISTIC);
-
-	void setCurrentProgram(uint8_t* data);
-
-
+    //[/UserMethods]
 private:
     //[UserVariables]   -- You can add your own custom variables in this section.
+    DexedAudioProcessorEditor *mainWindow;
+    File cartDir;
+    File libraryFile;
+    ScopedPointer<TextButton> scanButton;
+    ScopedPointer<TextButton> factoryResetButton;
+    PresetsListComponent *presetListBox;
+    LibraryButtonsPanel *libraryButtonPanel;
+    String statusMessage;
+    
+#ifdef DEBUG
+    DocumentWindow *statusWindow;
+    TextEditor *statusText;
+#endif
     //[/UserVariables]
 
     //==============================================================================

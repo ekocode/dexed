@@ -30,7 +30,7 @@
 PresetEditorPanel::PresetEditorPanel (PresetsLibrary* presetLibrary)
 {
     //[Constructor_pre] You can add your own custom stuff here..
-    //[/Constructor_pre]
+    
 	currentPreset = nullptr;
 	this->presetLibrary = presetLibrary;
 	xmlPresetLibrary = presetLibrary->xmlPresetLibrary;
@@ -67,7 +67,7 @@ PresetEditorPanel::PresetEditorPanel (PresetsLibrary* presetLibrary)
 	saveButton->addListener(this);
 
 
-
+    //[/Constructor_pre]
     //[Constructor] You can add your own custom stuff here..
     //[/Constructor]
 }
@@ -83,126 +83,7 @@ PresetEditorPanel::~PresetEditorPanel()
     //[/Destructor]
 }
 
-void PresetEditorPanel::makeTags()
-{
-	if (xmlPresetLibrary == nullptr)
-		return;
-	type.clear();
-	//characteristic.clear();
-	bank.clear();
 
-	XmlElement* typeElements = (xmlPresetLibrary->getChildByName(XML_TAG_TAGS))->getChildByName(XML_TAG_TYPES);
-	XmlElement* bankElements = (xmlPresetLibrary->getChildByName(XML_TAG_TAGS))->getChildByName(XML_TAG_BANKS);
-	XmlElement* characteristicElements = (xmlPresetLibrary->getChildByName(XML_TAG_TAGS))->getChildByName(XML_TAG_CHARACTERISTICS);
-
-
-	int i;
-	i = 1; //offset because combobox can't handle 0
-	forEachXmlChildElement(*typeElements, child)
-	{
-		type.addItem(child->getStringAttribute("name"), i);
-		i++;
-	}
-	i = 0;
-	forEachXmlChildElement(*characteristicElements, child)
-	{
-		addButton(new TagButton(child->getStringAttribute("name"), i, TagType::CHARACTERISTIC));
-		i++;
-	}
-
-	i = 1; //offset because combobox can't handle 0
-	forEachXmlChildElement(*bankElements, child)
-	{
-		bank.addItem(child->getStringAttribute("name"), i);
-		i++;
-	}
-	performLayout();
-}
-
-void PresetEditorPanel::setPreset(XmlElement * preset)
-{
-	currentPreset = preset;
-	setTags();
-	repaint();
-}
-
-void PresetEditorPanel::buttonClicked(Button * button)
-{
-	
-	//presetEdited();
-	if (button == saveButton)
-	{
-		savePreset();
-	}
-}
-
-void PresetEditorPanel::presetEdited()
-{
-}
-
-void PresetEditorPanel::savePreset()
-{
-	TRACE("Save Preset");
-	presetLibrary->setPresetName(currentPreset, name.getText());
-	currentPreset->setAttribute("designer", designer.getText());
-	currentPreset->setAttribute("bankTag", bank.getSelectedId() - 1);
-	currentPreset->setAttribute("typeTag", type.getSelectedId() - 1);
-
-	
-	presetLibrary->selectPreset(currentPreset);
-	//presetLibrary->log("_CLEAR");
-	//presetLibrary->log(currentPreset->createDocument(String()));
-	presetLibrary->repaint();
-}
-
-void PresetEditorPanel::setTags()
-{
-	if (currentPreset == nullptr)
-		return;
-
-	name.setText(currentPreset->getStringAttribute("name"));
-	designer.setText(currentPreset->getStringAttribute("designer"));
-	int bankValue = currentPreset->getIntAttribute("bankTag");
-	int typeValue = currentPreset->getIntAttribute("typeTag");
-	//presetLibrary->log(currentPreset->createDocument(String()));
-
-
-	if (bankValue > -1)
-	{
-		//presetLibrary->log("ok");
-		bank.setSelectedId(bankValue+1);
-	}
-	else
-	{
-		bank.setSelectedId(0);
-	}
-
-	if (typeValue > -1)
-	{
-		type.setSelectedId(typeValue + 1);
-	}
-	else
-	{
-		type.setSelectedId(0);
-	}
-	repaint();
-}
-
-void PresetEditorPanel::performLayout()
-{
-	int width = getWidth();
-	characteristicFlexBox.performLayout(Rectangle<int>(0, 100, width, 200));
-}
-
-void PresetEditorPanel::addButton(TagButton * button)
-{
-	characteristicFlexBox.items.add(FlexItem((getWidth() / 3) - 2, 20).withMargin(1));
-	auto &flexItem = characteristicFlexBox.items.getReference(characteristicFlexBox.items.size() - 1);
-	characteristicButtons.add(button);
-	flexItem.associatedComponent = button;
-	addAndMakeVisible(button);
-	//button->addListener(this);
-}
 
 //==============================================================================
 void PresetEditorPanel::paint (Graphics& g)
@@ -230,6 +111,163 @@ void PresetEditorPanel::resized()
 
 
 //[MiscUserCode] You can add your own definitions of your custom methods or any other code here...
+void PresetEditorPanel::makeTags()
+{
+    if (xmlPresetLibrary == nullptr)
+        return;
+    type.clear();
+    //characteristic.clear();
+    bank.clear();
+    
+    XmlElement* typeElements = (xmlPresetLibrary->getChildByName(XML_TAG_TAGS))->getChildByName(XML_TAG_TYPES);
+    XmlElement* bankElements = (xmlPresetLibrary->getChildByName(XML_TAG_TAGS))->getChildByName(XML_TAG_BANKS);
+    XmlElement* characteristicElements = (xmlPresetLibrary->getChildByName(XML_TAG_TAGS))->getChildByName(XML_TAG_CHARACTERISTICS);
+    
+    
+    int i;
+    i = 1; //offset because combobox can't handle 0
+    forEachXmlChildElement(*typeElements, child)
+    {
+        type.addItem(child->getStringAttribute("name"), i);
+        i++;
+    }
+    i = 0;
+    forEachXmlChildElement(*characteristicElements, child)
+    {
+        addButton(new TagButton(child->getStringAttribute("name"), i, TagType::CHARACTERISTIC));
+        i++;
+    }
+    
+    i = 1; //offset because combobox can't handle 0
+    forEachXmlChildElement(*bankElements, child)
+    {
+        bank.addItem(child->getStringAttribute("name"), i);
+        i++;
+    }
+    performLayout();
+}
+
+void PresetEditorPanel::setPreset(XmlElement * preset)
+{
+    currentPreset = preset;
+    setTags();
+    repaint();
+}
+
+void PresetEditorPanel::buttonClicked(Button * button)
+{
+    
+    //presetEdited();
+    if (button == saveButton)
+    {
+        savePreset();
+    }
+}
+
+void PresetEditorPanel::presetEdited()
+{
+}
+
+void PresetEditorPanel::savePreset()
+{
+    TRACE("Save Preset");
+    presetLibrary->setPresetName(currentPreset, name.getText());
+    currentPreset->setAttribute("designer", designer.getText());
+    currentPreset->setAttribute("bankTag", bank.getSelectedId() - 1);
+    currentPreset->setAttribute("typeTag", type.getSelectedId() - 1);
+    
+    //ScopedPointer<OwnedArray<TagButton>>pcharacteristicButtons = &characteristicButtons;
+    //getTagsButtonsState(pcharacteristicButtons);
+    //presetLibrary->arrayToXml(getTagsButtonsState(characteristicButtons));
+    presetLibrary->selectPreset(currentPreset);
+    //presetLibrary->log("_CLEAR");
+    //presetLibrary->log(currentPreset->createDocument(String()));
+    presetLibrary->repaint();
+}
+
+Array<int> getTagsButtonsState(ScopedPointer<OwnedArray<TagButton>> tagsButtons )
+{
+    TagButton* button;
+    Array<int> output;
+    //    for (int i=0; i<tagsButtons->size();i++) {
+    //
+    //        button = tagsButtons->getUnchecked(i);
+    //        if(button->getToggleState())
+    //        {
+    //            output.add(i);
+    //        }
+    //    }
+    return output;
+    
+}
+void setTagsButtonsState(ScopedPointer<OwnedArray<TagButton>> tagsButtons,Array<int> tagsOn)
+{
+    //all tags off
+    //    TagButton* button;
+    //    for (int i=0; i<tagsButtons->size();i++) {
+    //
+    //        button = tagsButtons->getUnchecked(i);
+    //        button->setToggleState(false,dontSendNotification);
+    //    }
+    //    //select the list id
+    //    for (int i=0; i<tagsOn.size();i++) {
+    //
+    //        if(i<tagsButtons->size())
+    //        {
+    //            button = tagsButtons->getUnchecked(i);
+    //            button->setToggleState(true,dontSendNotification);
+    //        }
+    //    }
+}
+
+void PresetEditorPanel::setTags()
+{
+    if (currentPreset == nullptr)
+        return;
+    
+    name.setText(currentPreset->getStringAttribute("name"));
+    designer.setText(currentPreset->getStringAttribute("designer"));
+    int bankValue = currentPreset->getIntAttribute("bankTag");
+    int typeValue = currentPreset->getIntAttribute("typeTag");
+    //presetLibrary->log(currentPreset->createDocument(String()));
+    
+    
+    if (bankValue > -1)
+    {
+        //presetLibrary->log("ok");
+        bank.setSelectedId(bankValue+1);
+    }
+    else
+    {
+        bank.setSelectedId(0);
+    }
+    
+    if (typeValue > -1)
+    {
+        type.setSelectedId(typeValue + 1);
+    }
+    else
+    {
+        type.setSelectedId(0);
+    }
+    repaint();
+}
+
+void PresetEditorPanel::performLayout()
+{
+    int width = getWidth();
+    characteristicFlexBox.performLayout(Rectangle<int>(0, 100, width, 200));
+}
+
+void PresetEditorPanel::addButton(TagButton * button)
+{
+    characteristicFlexBox.items.add(FlexItem((getWidth() / 3) - 2, 20).withMargin(1));
+    auto &flexItem = characteristicFlexBox.items.getReference(characteristicFlexBox.items.size() - 1);
+    characteristicButtons.add(button);
+    flexItem.associatedComponent = button;
+    addAndMakeVisible(button);
+    //button->addListener(this);
+}
 //[/MiscUserCode]
 
 

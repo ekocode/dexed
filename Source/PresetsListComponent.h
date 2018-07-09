@@ -23,10 +23,11 @@
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "DXLookNFeel.h"
 #include "PresetsLibrary.h"
+class PresetsLibrary;
 //[/Headers]
 
 
-class PresetsLibrary;
+
 //==============================================================================
 /**
                                                                     //[Comments]
@@ -45,17 +46,18 @@ public:
     //==============================================================================
     //[UserMethods]     -- You can add your own custom methods in this section.
 	void loadData(XmlElement * xmlPresetLibrary);
+    int getNumRows() override;
+    void paintRowBackground(Graphics& g, int rowNumber, int /*width*/, int /*height*/, bool rowIsSelected) override;
+    void paintCell(Graphics& g, int rowNumber, int columnId,
+                   int width, int height, bool /*rowIsSelected*/) override;
+    void sortOrderChanged(int newSortColumnId, bool isForwards) override;
+    void selectedRowsChanged(int row) override;
     //[/UserMethods]
 
     void paint (Graphics& g) override;
     void resized() override;
 
-	int getNumRows() override;
-	void paintRowBackground(Graphics& g, int rowNumber, int /*width*/, int /*height*/, bool rowIsSelected) override;
-	void paintCell(Graphics& g, int rowNumber, int columnId,
-		int width, int height, bool /*rowIsSelected*/) override;
-	void sortOrderChanged(int newSortColumnId, bool isForwards) override;
-	void selectedRowsChanged(int row) override;
+	
 
 
 
@@ -70,35 +72,37 @@ private:
 	int numRows;                          // The number of rows of data we've got
 	OwnedArray<Button> favoriteButtons;
 	String getAttributeNameForColumnId(const int columnId) const;
+    
+    //==============================================================================
+    // A comparator used to sort our data when the user clicks a column header
+    class LibraryDataSorter
+    {
+    public:
+        LibraryDataSorter(const String& attributeToSortBy, bool forwards)
+        : attributeToSort(attributeToSortBy),
+        direction(forwards ? 1 : -1)
+        {
+        }
+        
+        int compareElements(XmlElement* first, XmlElement* second) const
+        {
+            auto result = first->getStringAttribute(attributeToSort)
+            .compareNatural(second->getStringAttribute(attributeToSort));
+            
+            if (result == 0)
+                result = first->getStringAttribute("ID")
+                .compareNatural(second->getStringAttribute("ID"));
+            
+            return direction * result;
+        }
+        
+    private:
+        String attributeToSort;
+        int direction;
+        
 	
     //[/UserVariables]
-	//==============================================================================
-	// A comparator used to sort our data when the user clicks a column header
-	class LibraryDataSorter
-	{
-	public:
-		LibraryDataSorter(const String& attributeToSortBy, bool forwards)
-			: attributeToSort(attributeToSortBy),
-			direction(forwards ? 1 : -1)
-		{
-		}
-
-		int compareElements(XmlElement* first, XmlElement* second) const
-		{
-			auto result = first->getStringAttribute(attributeToSort)
-				.compareNatural(second->getStringAttribute(attributeToSort));
-
-			if (result == 0)
-				result = first->getStringAttribute("ID")
-				.compareNatural(second->getStringAttribute("ID"));
-
-			return direction * result;
-		}
-
-	private:
-		String attributeToSort;
-		int direction;
-		
+	
 	};
     //==============================================================================
 

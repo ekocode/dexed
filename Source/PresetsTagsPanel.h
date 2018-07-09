@@ -22,8 +22,9 @@
 //[Headers]     -- You can add your own extra header files here --
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "PresetsLibrary.h"
-//[/Headers]
 struct TagButton;
+//[/Headers]
+
 
 
 
@@ -46,24 +47,25 @@ public:
 
     //==============================================================================
     //[UserMethods]     -- You can add your own custom methods in this section.
-    //[/UserMethods]
+    
 
     void paint (Graphics& g) override;
     void resized() override;
 
 	void performLayout();
 	void addButton(TagButton* button);
-
+    //[/UserMethods]
 
 
 private:
+    //[UserVariables]   -- You can add your own custom variables in this section.
 	FlexBox typeFlexBox;
 	FlexBox characteristicFlexBox;
 	FlexBox bankFlexBox;
 	OwnedArray<TagButton> typeButtons;
 	OwnedArray<TagButton> characteristicButtons;
 	OwnedArray<TagButton> bankButtons;
-    //[UserVariables]   -- You can add your own custom variables in this section.
+    
     //[/UserVariables]
 
     //==============================================================================

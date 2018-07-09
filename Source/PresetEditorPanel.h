@@ -22,8 +22,9 @@
 //[Headers]     -- You can add your own extra header files here --
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "PresetsLibrary.h"
-//[/Headers]
 struct TagButton;
+//[/Headers]
+
 //==============================================================================
 /**
                                                                     //[Comments]
@@ -39,18 +40,23 @@ public:
     
 	PresetEditorPanel(PresetsLibrary* presetLibrary);
     ~PresetEditorPanel();
+	
 
-	void makeTags();	
-	void setPreset(XmlElement* preset);
-	void buttonClicked(Button* button) override;
-	void presetEdited();
-	void savePreset();
-	void setTags();
-	void performLayout();
-	void addButton(TagButton* button);
-
+    
     //==============================================================================
     //[UserMethods]     -- You can add your own custom methods in this section.
+    void setPreset(XmlElement* preset);
+    
+    void presetEdited();
+    void savePreset();
+    
+    void setTags();
+    void makeTags();
+    static Array<int> getTagsButtonsState(ScopedPointer<OwnedArray<TagButton>> tagsButtons );
+    static void setTagsButtonsState(ScopedPointer<OwnedArray<TagButton>> tagsButtons,Array<int> tagsOn);
+    void addButton(TagButton* button);
+    void buttonClicked(Button* button) override;
+    void performLayout();
     //[/UserMethods]
 
     void paint (Graphics& g) override;
@@ -60,15 +66,16 @@ public:
 
 private:
     //[UserVariables]   -- You can add your own custom variables in this section.
+    PresetsLibrary * presetLibrary;
+    XmlElement * currentPreset;
+    XmlElement* xmlPresetLibrary;
+    FlexBox characteristicFlexBox;
+    OwnedArray<TagButton> characteristicButtons;
+    TextEditor name, designer;
+    ComboBox type, bank;
+    ScopedPointer<TextButton> saveButton;
     //[/UserVariables]
-	PresetsLibrary * presetLibrary;
-	XmlElement * currentPreset;
-	XmlElement* xmlPresetLibrary;
-	FlexBox characteristicFlexBox;
-	OwnedArray<TagButton> characteristicButtons;
-	TextEditor name, designer;
-	ComboBox type, bank;
-	ScopedPointer<TextButton> saveButton;
+	
     //==============================================================================
 
 

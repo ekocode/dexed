@@ -35,6 +35,7 @@ PresetsTagsPanel::PresetsTagsPanel ()
 
     //[UserPreSize]
     //[/UserPreSize]
+    //[Constructor] You can add your own custom stuff here..
 	typeFlexBox.alignContent = FlexBox::AlignContent::flexStart;
 	typeFlexBox.flexDirection = FlexBox::Direction::row;
 	typeFlexBox.justifyContent = FlexBox::JustifyContent::flexStart;
@@ -55,7 +56,7 @@ PresetsTagsPanel::PresetsTagsPanel ()
     //setSize (600, 400);
 
 
-    //[Constructor] You can add your own custom stuff here..
+    
     //[/Constructor]
 }
 
@@ -91,6 +92,7 @@ void PresetsTagsPanel::resized()
     //[/UserResized]
 }
 
+//[MiscUserCode] You can add your own definitions of your custom methods or any other code here...
 void PresetsTagsPanel::performLayout()
 {
 	int width = getWidth();
@@ -128,8 +130,6 @@ void PresetsTagsPanel::addButton(TagButton * button)
 	addAndMakeVisible(button);
 }
 
-
-//[MiscUserCode] You can add your own definitions of your custom methods or any other code here...
 //[/MiscUserCode]
 
 
