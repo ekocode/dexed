@@ -52,8 +52,8 @@ public:
     
     void setTags();
     void makeTags();
-    static Array<int> getTagsButtonsState(ScopedPointer<OwnedArray<TagButton>> tagsButtonsOK );
-    static void setTagsButtonsState(ScopedPointer<OwnedArray<TagButton>> tagsButtons,Array<int> tagsOn);
+	static Array<int> getTagsButtonsState(OwnedArray<TagButton>* tagsButtons);
+	static void setTagsButtonsState(OwnedArray<TagButton>* tagsButtons, Array<int> tagsOn);
     void addButton(TagButton* button);
     void buttonClicked(Button* button) override;
     void performLayout();
@@ -69,8 +69,9 @@ private:
     PresetsLibrary * presetLibrary;
     XmlElement * currentPreset;
     XmlElement* xmlPresetLibrary;
-    FlexBox editCharacteristicFlexBox;
-    OwnedArray<TagButton> editCharacteristicButtons;
+    FlexBox characteristicFlexBox;
+    OwnedArray<TagButton> characteristicButtons;
+	//ScopedPointer<OwnedArray<TagButton>> p_editCharacteristicButtons;
     TextEditor name, designer;
     ComboBox type, bank;
     ScopedPointer<TextButton> saveButton;

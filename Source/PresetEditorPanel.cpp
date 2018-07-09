@@ -35,12 +35,13 @@ PresetEditorPanel::PresetEditorPanel (PresetsLibrary* presetLibrary)
 	this->presetLibrary = presetLibrary;
 	xmlPresetLibrary = presetLibrary->xmlPresetLibrary;
 
-	editCharacteristicFlexBox.alignContent = FlexBox::AlignContent::flexStart;
-	editCharacteristicFlexBox.flexDirection = FlexBox::Direction::row;
-	editCharacteristicFlexBox.justifyContent = FlexBox::JustifyContent::flexStart;
-	editCharacteristicFlexBox.alignItems = FlexBox::AlignItems::flexStart;
-	editCharacteristicFlexBox.flexWrap = FlexBox::Wrap::wrap;
+	characteristicFlexBox.alignContent = FlexBox::AlignContent::flexStart;
+	characteristicFlexBox.flexDirection = FlexBox::Direction::row;
+	characteristicFlexBox.justifyContent = FlexBox::JustifyContent::flexStart;
+	characteristicFlexBox.alignItems = FlexBox::AlignItems::flexStart;
+	characteristicFlexBox.flexWrap = FlexBox::Wrap::wrap;
 
+	
 	//name.setReadOnly(true);
 	//designer.setReadOnly(true);
 	//type.setEnabled(false);
@@ -175,49 +176,45 @@ void PresetEditorPanel::savePreset()
     currentPreset->setAttribute("designer", designer.getText());
     currentPreset->setAttribute("bankTag", bank.getSelectedId() - 1);
     currentPreset->setAttribute("typeTag", type.getSelectedId() - 1);
-    
-    //ScopedPointer<OwnedArray<TagButton>>pcharacteristicButtons = &characteristicButtons;
-    //getTagsButtonsState(&editCharacteristicButtons);
-    //presetLibrary->arrayToXml(getTagsButtonsState(characteristicButtons));
+	currentPreset->setAttribute("characteristicTags", presetLibrary->arrayToXml(getTagsButtonsState(&characteristicButtons)));
+
     presetLibrary->selectPreset(currentPreset);
-    //presetLibrary->log("_CLEAR");
-    //presetLibrary->log(currentPreset->createDocument(String()));
     presetLibrary->repaint();
 }
 
-Array<int> getTagsButtonsState(ScopedPointer<OwnedArray<TagButton>> tagsButtonsOK )
+Array<int> PresetEditorPanel::getTagsButtonsState(OwnedArray<TagButton>* tagsButtons)
 {
-    TagButton* button;
+    TagButton* button;	
     Array<int> output;
-    //    for (int i=0; i<tagsButtons->size();i++) {
-    //
-    //        button = tagsButtons->getUnchecked(i);
-    //        if(button->getToggleState())
-    //        {
-    //            output.add(i);
-    //        }
-    //    }
-    return output;
-    
+        for (int i=0; i < tagsButtons->size(); i++) 
+		{    
+            button = tagsButtons->getUnchecked(i);
+            if(button->getToggleState())
+            {
+                output.add(i);
+            }
+        }
+    return output;    
 }
-void setTagsButtonsState(ScopedPointer<OwnedArray<TagButton>> tagsButtons,Array<int> tagsOn)
+
+void PresetEditorPanel::setTagsButtonsState(OwnedArray<TagButton>* tagsButtons,Array<int> tagsOn)
 {
-    //all tags off
-    //    TagButton* button;
-    //    for (int i=0; i<tagsButtons->size();i++) {
-    //
-    //        button = tagsButtons->getUnchecked(i);
-    //        button->setToggleState(false,dontSendNotification);
-    //    }
-    //    //select the list id
-    //    for (int i=0; i<tagsOn.size();i++) {
-    //
-    //        if(i<tagsButtons->size())
-    //        {
-    //            button = tagsButtons->getUnchecked(i);
-    //            button->setToggleState(true,dontSendNotification);
-    //        }
-    //    }
+		//all tags off
+        TagButton* button;
+        for (int i=0; i<tagsButtons->size();i++) {
+    
+            button = tagsButtons->getUnchecked(i);
+            button->setToggleState(false,dontSendNotification);
+        }
+        //select the list id
+        for (int i=0; i<tagsOn.size();i++) {
+    
+            if(i<tagsButtons->size())
+            {
+                button = tagsButtons->getUnchecked(tagsOn.getReference(i));
+                button->setToggleState(true,dontSendNotification);
+            }
+        }
 }
 
 void PresetEditorPanel::setTags()
@@ -229,12 +226,12 @@ void PresetEditorPanel::setTags()
     designer.setText(currentPreset->getStringAttribute("designer"));
     int bankValue = currentPreset->getIntAttribute("bankTag");
     int typeValue = currentPreset->getIntAttribute("typeTag");
-    //presetLibrary->log(currentPreset->createDocument(String()));
-    
+   
+	setTagsButtonsState(&characteristicButtons,presetLibrary->xmlToArray(currentPreset->getStringAttribute("characteristicTags")));
+
     
     if (bankValue > -1)
     {
-        //presetLibrary->log("ok");
         bank.setSelectedId(bankValue+1);
     }
     else
@@ -256,14 +253,14 @@ void PresetEditorPanel::setTags()
 void PresetEditorPanel::performLayout()
 {
     int width = getWidth();
-    editCharacteristicFlexBox.performLayout(Rectangle<int>(0, 100, width, 200));
+    characteristicFlexBox.performLayout(Rectangle<int>(0, 100, width, 200));
 }
 
 void PresetEditorPanel::addButton(TagButton * button)
 {
-    editCharacteristicFlexBox.items.add(FlexItem((getWidth() / 3) - 2, 20).withMargin(1));
-    auto &flexItem = editCharacteristicFlexBox.items.getReference(editCharacteristicFlexBox.items.size() - 1);
-    editCharacteristicButtons.add(button);
+    characteristicFlexBox.items.add(FlexItem((getWidth() / 3) - 2, 20).withMargin(1));
+    auto &flexItem = characteristicFlexBox.items.getReference(characteristicFlexBox.items.size() - 1);
+    characteristicButtons.add(button);
     flexItem.associatedComponent = button;
     addAndMakeVisible(button);
     //button->addListener(this);

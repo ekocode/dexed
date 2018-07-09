@@ -178,6 +178,7 @@ void PresetsLibrary::selectPreset(XmlElement* preset)
 {
 	//log("select preset###############");
 	presetEditorPanel->setPreset(preset);
+	//log(preset->createDocument(String()));
 	uint8_t data[PROGRAM_LENGTH];
 	getDataFromPreset(data, preset);
 	/*log("###########");
@@ -294,7 +295,7 @@ Array<int> PresetsLibrary::xmlToArray(String xmlArray)
     Array<int> output;
     buffer.addTokens(xmlArray, " ");
     for (int i=0; i<buffer.size(); i++) {
-        output.add(buffer.getReference(i).getIntValue());
+		 output.add(buffer.getReference(i).getIntValue());
     }
     return output;
 }
