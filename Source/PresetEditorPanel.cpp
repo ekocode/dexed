@@ -32,7 +32,7 @@ PresetEditorPanel::PresetEditorPanel (PresetsLibrary* presetLibrary)
     //[Constructor_pre] You can add your own custom stuff here..
     
 	currentPreset = nullptr;
-	this->presetLibrary = presetLibrary;
+	this->presetsLibrary = presetLibrary;
 	xmlPresetLibrary = presetLibrary->xmlPresetLibrary;
 
 	characteristicFlexBox.alignContent = FlexBox::AlignContent::flexStart;
@@ -172,14 +172,14 @@ void PresetEditorPanel::presetEdited()
 void PresetEditorPanel::savePreset()
 {
     TRACE("Save Preset");
-    presetLibrary->setPresetName(currentPreset, name.getText());
+    presetsLibrary->setPresetName(currentPreset, name.getText());
     currentPreset->setAttribute("designer", designer.getText());
     currentPreset->setAttribute("bankTag", bank.getSelectedId() - 1);
     currentPreset->setAttribute("typeTag", type.getSelectedId() - 1);
-	currentPreset->setAttribute("characteristicTags", presetLibrary->arrayToXml(getTagsButtonsState(&characteristicButtons)));
+	currentPreset->setAttribute("characteristicTags", presetsLibrary->arrayToXml(getTagsButtonsState(&characteristicButtons)));
 
-    presetLibrary->selectPreset(currentPreset);
-    presetLibrary->repaint();
+    presetsLibrary->selectPreset(currentPreset);
+    presetsLibrary->repaint();
 }
 
 Array<int> PresetEditorPanel::getTagsButtonsState(OwnedArray<TagButton>* tagsButtons)
@@ -234,7 +234,7 @@ void PresetEditorPanel::setTags()
     int bankValue = currentPreset->getIntAttribute("bankTag");
     int typeValue = currentPreset->getIntAttribute("typeTag");
    
-	setTagsButtonsState(&characteristicButtons,presetLibrary->xmlToArray(currentPreset->getStringAttribute("characteristicTags")));
+	setTagsButtonsState(&characteristicButtons,presetsLibrary->xmlToArray(currentPreset->getStringAttribute("characteristicTags")));
 
     
     if (bankValue > -1)

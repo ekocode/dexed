@@ -67,7 +67,7 @@ public:
 
 private:
     //[UserVariables]   -- You can add your own custom variables in this section.
-    PresetsLibrary * presetLibrary;
+    PresetsLibrary * presetsLibrary;
     XmlElement * currentPreset;
     XmlElement* xmlPresetLibrary;
     FlexBox characteristicFlexBox;

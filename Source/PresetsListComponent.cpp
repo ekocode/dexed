@@ -42,8 +42,8 @@ PresetsListComponent::PresetsListComponent (PresetsLibrary * presetsLibrary)
     
     
     // give it a border
-    table.setColour(ListBox::outlineColourId, Colours::grey);
-    table.setOutlineThickness(1);
+    table.setColour(ListBox::backgroundColourId, DXLookNFeel::libraryDarkText);
+    //table.setOutlineThickness(1);
     
     // Add some columns to the table header, based on the column list in our database..
     /*forEachXmlChildElement(*columnList, columnXml)
@@ -95,7 +95,7 @@ void PresetsListComponent::paint (Graphics& g)
     //[UserPrePaint] Add your own custom painting code here..
     //[/UserPrePaint]
     
-    // g.fillAll (DXLookNFeel::background);
+    g.fillAll (DXLookNFeel::background);
     
     //[UserPaint] Add your own custom painting code here..
     //[/UserPaint]
@@ -121,8 +121,10 @@ void PresetsListComponent::loadData(XmlElement* xmlPresetLibrary)
     table.deselectAllRows();
     dataList.clear();
     Array<int> typeFilters = presetsLibrary->tagsPanel->getTypeButtonsState();
+	Array<int> characteristicFilters = presetsLibrary->tagsPanel->getCharacteristicButtonsState();
+	Array<int> bankFilters = presetsLibrary->tagsPanel->getBankButtonsState();
     
-    if(typeFilters.size()==0)
+    if(typeFilters.size()==0 && characteristicFilters.size()==0 && bankFilters.size()==0)
     {
         forEachXmlChildElement(*xmlPresetLibrary->getChildByName(XML_TAG_PRESETS) , child)
         {
@@ -137,15 +139,39 @@ void PresetsListComponent::loadData(XmlElement* xmlPresetLibrary)
         forEachXmlChildElement(*xmlPresetLibrary->getChildByName(XML_TAG_PRESETS) , child)
         {
             bool typeFilterFound=false;
+			bool characteristicFilterFound = false;
+			bool bankFilterFound = false;
+
+
             for (int i=0; i<typeFilters.size();i++) {
                 if(child->getIntAttribute("typeTag")==typeFilters.getReference(i))
                 {
                     typeFilterFound=true;
-                    continue;
+                    break;
                 }
             }
+
+			for (int i = 0; i<characteristicFilters.size(); i++) {
+				Array<int> presetTags = presetsLibrary->xmlToArray(child->getStringAttribute("characteristicTags"));
+
+				if (presetTags.contains( characteristicFilters.getReference(i)))
+				{
+					characteristicFilterFound = true;
+					break;
+				}
+			}
+
+			for (int i = 0; i<bankFilters.size(); i++) {
+				if (child->getIntAttribute("bankTag") == bankFilters.getReference(i))
+				{
+					bankFilterFound = true;
+					break;
+				}
+			}
             
-            if (typeFilterFound)
+            if ((typeFilterFound || typeFilters.size()==0)
+				&& (characteristicFilterFound || characteristicFilters.size() == 0)
+				&& (bankFilterFound || bankFilters.size() == 0))
             {
                 dataList.add (child);
             }
@@ -281,7 +307,7 @@ void PresetsListComponent::sortOrderChanged(int newSortColumnId, bool isForwards
 
 void PresetsListComponent::selectedRowsChanged(int row)
 {
-    if(row<numRows)
+    if(row<numRows && row!=-1)
     {
         presetsLibrary->selectPreset(dataList.getUnchecked(row));
     }

@@ -84,6 +84,7 @@ PresetsLibrary::PresetsLibrary (DexedAudioProcessorEditor *editor)
     factoryResetButton->addListener(this);
     
 	libraryPanel->addAndMakeVisible(presetListBox = new PresetsListComponent(this));
+	
 	//presetListBox->addComponentListener(this);
     makeTagsButtons();
 	presetEditorPanel->makeTags();
@@ -577,8 +578,10 @@ String PresetsLibrary::getTagName(int id,TagType type)
 void PresetsLibrary::tagFilter()
 {
     //log(String(presetListBox->table.getNumSelectedRows()));
-    presetListBox->table.deselectAllRows();
-   // presetListBox->loadData(xmlPresetLibrary);
+    //presetListBox->table.deselectRow(presetListBox->table.getLastRowSelected());
+	//log(String(presetListBox->table.getLastRowSelected()));
+	//presetListBox->table.deselectAllRows();
+	presetListBox->loadData(xmlPresetLibrary);
     
 }
 
