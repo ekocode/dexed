@@ -63,9 +63,19 @@ PresetEditorPanel::PresetEditorPanel (PresetsLibrary* presetLibrary)
 	addAndMakeVisible(bank);
 	bank.setBounds(0, 66, 100, 20);
 	bank.setTextWhenNothingSelected("Undefined");
+
+	int yButton = 300;
 	addAndMakeVisible(saveButton = new TextButton("SAVE"));
-	saveButton->setBounds(0, 300, 50, 30);
+	saveButton->setBounds(0, yButton, 50, 30);
 	saveButton->addListener(this);
+	addAndMakeVisible(saveAsButton = new TextButton("SAVE AS"));
+	saveAsButton->setBounds(60, yButton, 50, 30);
+	saveAsButton->addListener(this);
+	saveAsButton->setEnabled(false);
+	addAndMakeVisible(deleteButton = new TextButton("DELETE"));
+	deleteButton->setBounds(120, yButton, 50, 30);
+	deleteButton->addListener(this);
+	deleteButton->setEnabled(false);
 
 
     //[/Constructor_pre]

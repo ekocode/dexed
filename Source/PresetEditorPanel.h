@@ -76,6 +76,8 @@ private:
     TextEditor name, designer;
     ComboBox type, bank;
     ScopedPointer<TextButton> saveButton;
+	ScopedPointer<TextButton> saveAsButton;
+	ScopedPointer<TextButton> deleteButton;
     //[/UserVariables]
 	
     //==============================================================================

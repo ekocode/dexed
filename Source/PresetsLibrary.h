@@ -185,7 +185,9 @@ private:
     File cartDir;
     File libraryFile;
     ScopedPointer<TextButton> scanButton;
+	ScopedPointer<TextButton> saveLibraryButton;
     ScopedPointer<TextButton> factoryResetButton;
+	ScopedPointer<TextButton> unselectAllTagsButton;
     PresetsListComponent *presetListBox;
     LibraryButtonsPanel *libraryButtonPanel;
     String statusMessage;

@@ -76,15 +76,24 @@ PresetsLibrary::PresetsLibrary (DexedAudioProcessorEditor *editor)
     
     
     libraryButtonPanel->setBounds(getLocalBounds().removeFromBottom(toolbarHeight));
-    libraryButtonPanel->addAndMakeVisible(scanButton = new TextButton("Import Directory"));
-    scanButton->setBounds(2, 2, 100, 30);
+    libraryButtonPanel->addAndMakeVisible(scanButton = new TextButton("Import presets"));
+    scanButton->setBounds(130, 2, 100, 30);
     scanButton->addListener(this);
+	scanButton->setEnabled(false);
     libraryButtonPanel->addAndMakeVisible(factoryResetButton = new TextButton("Reset Presets Lib"));
-    factoryResetButton->setBounds(104, 2, 120, 30);
+    factoryResetButton->setBounds(400, 2, 120, 30);
     factoryResetButton->addListener(this);
-    
+	libraryButtonPanel->addAndMakeVisible(saveLibraryButton = new TextButton("Save Library"));
+	saveLibraryButton->setBounds(530, 2, 120, 30);
+	saveLibraryButton->addListener(this);
+	libraryButtonPanel->addAndMakeVisible(unselectAllTagsButton = new TextButton("Unselect All filters"));
+	unselectAllTagsButton->setBounds(2, 2, 120, 30);
+	unselectAllTagsButton->addListener(this);
+
 	libraryPanel->addAndMakeVisible(presetListBox = new PresetsListComponent(this));
 	
+
+
 	//presetListBox->addComponentListener(this);
     makeTagsButtons();
 	presetEditorPanel->makeTags();
@@ -169,15 +178,23 @@ void PresetsLibrary::buttonClicked(juce::Button *buttonThatWasClicked) {
         
         return;
     }
-	if (buttonThatWasClicked == factoryResetButton) {
-		generateDefaultXml();
+	else if (buttonThatWasClicked == saveLibraryButton)
+	{
+		saveLibrary();
 	}
-    
-    if( dynamic_cast<TagButton*>( buttonThatWasClicked ) )
+	else if (buttonThatWasClicked == factoryResetButton) {
+		generateDefaultXml();
+	}    
+    else if( dynamic_cast<TagButton*>( buttonThatWasClicked ) )
     {
         log("tag button");
         tagFilter();
     }
+	else if (buttonThatWasClicked == unselectAllTagsButton) {
+		tagsPanel->unselectAll();
+		tagFilter();
+	}
+	
 
 
 }
@@ -537,7 +554,10 @@ int PresetsLibrary::loadLibrary()
 
 int PresetsLibrary::saveLibrary()
 {
-	//generateDefaultXml();
+	
+	libraryFile.deleteFile();
+	libraryFile.create();
+	libraryFile.appendText(xmlPresetLibrary->createDocument(String()));
 
 	return 1;
 }
