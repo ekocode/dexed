@@ -22,6 +22,7 @@
 //[Headers]     -- You can add your own extra header files here --
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "PresetsLibrary.h"
+#include "PresetEditorPanel.h"
 struct TagButton;
 //[/Headers]
 
@@ -54,6 +55,10 @@ public:
 
 	void performLayout();
 	void addButton(TagButton* button);
+    Array<int> getTypeButtonsState();
+    Array<int> getCharacteristicButtonsState();
+    Array<int> getBankButtonsState();
+    void unselectAll();
     //[/UserMethods]
 
 

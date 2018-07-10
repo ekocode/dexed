@@ -58,17 +58,17 @@ public:
     void resized() override;
 
 	
-
+    TableListBox table;     // the table component itself
 
 
 private:
     //[UserVariables]   -- You can add your own custom variables in this section.
-	TableListBox table;     // the table component itself
+	
 	Font font{ 14.0f };
     PresetsLibrary* presetsLibrary;
 	//std::unique_ptr<XmlElement> demoData;  // This is the XML document loaded from the embedded file "demo table data.xml"
 	XmlElement* columnList = nullptr;     // A pointer to the sub-node of demoData that contains the list of columns
-	XmlElement* dataList = nullptr;     // A pointer to the sub-node of demoData that contains the list of data rows
+	Array<XmlElement*> dataList = nullptr;     // A pointer to the sub-node of demoData that contains the list of data rows
 	int numRows;                          // The number of rows of data we've got
 	OwnedArray<Button> favoriteButtons;
 	String getAttributeNameForColumnId(const int columnId) const;

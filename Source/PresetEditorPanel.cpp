@@ -200,13 +200,10 @@ Array<int> PresetEditorPanel::getTagsButtonsState(OwnedArray<TagButton>* tagsBut
 void PresetEditorPanel::setTagsButtonsState(OwnedArray<TagButton>* tagsButtons,Array<int> tagsOn)
 {
 		//all tags off
-        TagButton* button;
-        for (int i=0; i<tagsButtons->size();i++) {
+        unselectAllTagsButtons(tagsButtons);
     
-            button = tagsButtons->getUnchecked(i);
-            button->setToggleState(false,dontSendNotification);
-        }
         //select the list id
+        TagButton* button;
         for (int i=0; i<tagsOn.size();i++) {
     
             if(i<tagsButtons->size())
@@ -215,6 +212,16 @@ void PresetEditorPanel::setTagsButtonsState(OwnedArray<TagButton>* tagsButtons,A
                 button->setToggleState(true,dontSendNotification);
             }
         }
+}
+
+void PresetEditorPanel::unselectAllTagsButtons(OwnedArray<TagButton>* tagsButtons)
+{
+    TagButton* button;
+    for (int i=0; i<tagsButtons->size();i++) {
+        
+        button = tagsButtons->getUnchecked(i);
+        button->setToggleState(false,dontSendNotification);
+    }
 }
 
 void PresetEditorPanel::setTags()

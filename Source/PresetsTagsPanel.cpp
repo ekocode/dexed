@@ -130,6 +130,24 @@ void PresetsTagsPanel::addButton(TagButton * button)
 	addAndMakeVisible(button);
 }
 
+Array<int> PresetsTagsPanel::getTypeButtonsState()
+{
+    return PresetEditorPanel::getTagsButtonsState(&typeButtons);
+}
+Array<int> PresetsTagsPanel::getCharacteristicButtonsState()
+{
+    return PresetEditorPanel::getTagsButtonsState(&characteristicButtons);
+}
+Array<int> PresetsTagsPanel::getBankButtonsState()
+{
+    return PresetEditorPanel::getTagsButtonsState(&bankButtons);
+}
+void PresetsTagsPanel::unselectAll()
+{
+    PresetEditorPanel::unselectAllTagsButtons(&typeButtons);
+    PresetEditorPanel::unselectAllTagsButtons(&characteristicButtons);
+    PresetEditorPanel::unselectAllTagsButtons(&bankButtons);
+}
 //[/MiscUserCode]
 
 

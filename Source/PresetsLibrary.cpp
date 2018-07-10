@@ -149,7 +149,7 @@ void PresetsLibrary::resized()
 
 void PresetsLibrary::buttonClicked(juce::Button *buttonThatWasClicked) {
 
-    
+    log("button clicked");
     if ( buttonThatWasClicked == scanButton ) {
 
 		saveLibrary();
@@ -163,6 +163,7 @@ void PresetsLibrary::buttonClicked(juce::Button *buttonThatWasClicked) {
 		{
 			//File scanDir(myChooser.getResult());
 			scan(myChooser.getResult());
+            log("scan");
 		}
         
         return;
@@ -170,6 +171,12 @@ void PresetsLibrary::buttonClicked(juce::Button *buttonThatWasClicked) {
 	if (buttonThatWasClicked == factoryResetButton) {
 		generateDefaultXml();
 	}
+    
+    if( dynamic_cast<TagButton*>( buttonThatWasClicked ) )
+    {
+        log("tag button");
+        tagFilter();
+    }
 
 
 }
@@ -481,6 +488,7 @@ void PresetsLibrary::makeTagsButtons()
     XmlElement* typeElements = (xmlPresetLibrary->getChildByName(XML_TAG_TAGS))->getChildByName(XML_TAG_TYPES);
     XmlElement* bankElements = (xmlPresetLibrary->getChildByName(XML_TAG_TAGS))->getChildByName(XML_TAG_BANKS);
     XmlElement* characteristicElements = (xmlPresetLibrary->getChildByName(XML_TAG_TAGS))->getChildByName(XML_TAG_CHARACTERISTICS);
+    TagButton* button;
     if(characteristicElements ==nullptr)
     {
         log("null");
@@ -493,20 +501,23 @@ void PresetsLibrary::makeTagsButtons()
     i=0;
     forEachXmlChildElement(*typeElements, child)
     {
-        tagsPanel->addButton(new TagButton(child->getStringAttribute("name"), i, TagType::TYPE));
+        tagsPanel->addButton(button =new TagButton(child->getStringAttribute("name"), i, TagType::TYPE));
+        button->addListener(this);
         i++;
     }
 	i = 0;
 	
 	forEachXmlChildElement(*characteristicElements, child)
 	{
-		tagsPanel->addButton(new TagButton(child->getStringAttribute("name"), i, TagType::CHARACTERISTIC));
+		tagsPanel->addButton(button =new TagButton(child->getStringAttribute("name"), i, TagType::CHARACTERISTIC));
+        button->addListener(this);
 		i++;
 	}
 	i = 0;
 	forEachXmlChildElement(*bankElements, child)
 	{
-		tagsPanel->addButton(new TagButton(child->getStringAttribute("name"), i, TagType::BANK));
+		tagsPanel->addButton(button =new TagButton(child->getStringAttribute("name"), i, TagType::BANK));
+        button->addListener(this);
 		i++;
 	}
 	tagsPanel->performLayout();
@@ -561,6 +572,14 @@ String PresetsLibrary::getTagName(int id,TagType type)
             
     }
     return  (((xmlPresetLibrary->getChildByName(XML_TAG_TAGS))->getChildByName(typeString))->getChildElement(id))->getStringAttribute("name", String());
+}
+
+void PresetsLibrary::tagFilter()
+{
+    //log(String(presetListBox->table.getNumSelectedRows()));
+    presetListBox->table.deselectAllRows();
+   // presetListBox->loadData(xmlPresetLibrary);
+    
 }
 
 void PresetsLibrary::setCurrentProgram(uint8_t* data)

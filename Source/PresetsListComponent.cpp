@@ -117,9 +117,45 @@ void PresetsListComponent::resized()
 
 void PresetsListComponent::loadData(XmlElement* xmlPresetLibrary)
 {
-        dataList = xmlPresetLibrary->getChildByName(XML_TAG_PRESETS);
-        numRows = dataList->getNumChildElements();
-	
+    presetsLibrary->presetEditorPanel->setPreset(nullptr);
+    table.deselectAllRows();
+    dataList.clear();
+    Array<int> typeFilters = presetsLibrary->tagsPanel->getTypeButtonsState();
+    
+    if(typeFilters.size()==0)
+    {
+        forEachXmlChildElement(*xmlPresetLibrary->getChildByName(XML_TAG_PRESETS) , child)
+        {
+            if (true)
+            {
+                dataList.add (child);
+            }
+        }
+    }
+    else
+    {
+        forEachXmlChildElement(*xmlPresetLibrary->getChildByName(XML_TAG_PRESETS) , child)
+        {
+            bool typeFilterFound=false;
+            for (int i=0; i<typeFilters.size();i++) {
+                if(child->getIntAttribute("typeTag")==typeFilters.getReference(i))
+                {
+                    typeFilterFound=true;
+                    continue;
+                }
+            }
+            
+            if (typeFilterFound)
+            {
+                dataList.add (child);
+            }
+        }
+    }
+    
+    numRows = dataList.size();
+    
+    table.updateContent();
+    
 }
 
 
@@ -150,7 +186,7 @@ void PresetsListComponent::paintCell(Graphics & g, int rowNumber, int columnId, 
     justification = Justification::centredLeft;
     String text;
 
-    if (auto* rowElement = dataList->getChildElement(rowNumber))
+    if (auto* rowElement = dataList.getUnchecked(rowNumber))
     {
         
         if(columnId==2) //Instrument type
@@ -234,18 +270,22 @@ String PresetsListComponent::getAttributeNameForColumnId(const int columnId) con
 
 void PresetsListComponent::sortOrderChanged(int newSortColumnId, bool isForwards)
 {
-	if (newSortColumnId != 0)
-	{
-		LibraryDataSorter sorter(getAttributeNameForColumnId(newSortColumnId), isForwards);
-		dataList->sortChildElements(sorter);
+    if (newSortColumnId != 0)
+    {
+        LibraryDataSorter sorter(getAttributeNameForColumnId(newSortColumnId), isForwards);
+        dataList.sort(sorter);
 
-		table.updateContent();
-	}
+        table.updateContent();
+    }
 }
 
 void PresetsListComponent::selectedRowsChanged(int row)
 {
-	presetsLibrary->selectPreset(dataList->getChildElement(row));
+    if(row<numRows)
+    {
+        presetsLibrary->selectPreset(dataList.getUnchecked(row));
+    }
+	
 }
 
 

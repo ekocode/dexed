@@ -54,6 +54,7 @@ public:
     void makeTags();
 	static Array<int> getTagsButtonsState(OwnedArray<TagButton>* tagsButtons);
 	static void setTagsButtonsState(OwnedArray<TagButton>* tagsButtons, Array<int> tagsOn);
+    static void unselectAllTagsButtons(OwnedArray<TagButton>* tagsButtons);
     void addButton(TagButton* button);
     void buttonClicked(Button* button) override;
     void performLayout();

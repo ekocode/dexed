@@ -59,6 +59,7 @@ public:
 	static Colour libraryText;
 	static Colour libraryDarkText;
 	static Colour librarySelectedBackground;
+    
 };
 
 #endif  // DXLOOKNFEEL_H_INCLUDED

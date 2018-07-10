@@ -29,6 +29,7 @@
 #include "PresetsLibraryPanel.h"
 #include "PresetsTagsPanel.h"
 #include "PresetEditorPanel.h"
+#include "DXLookNFeel.h"
 
 #define PROGRAM_LENGTH 161
 
@@ -82,7 +83,7 @@ public:
         {
             g.setColour(DXLookNFeel::roundBackground);
             g.fillRect(getLocalBounds());
-            g.setColour(DXLookNFeel::libraryDarkBackground);
+            g.setColour(DXLookNFeel::libraryDarkText);
             g.drawText(getButtonText(), getLocalBounds().toFloat(), Justification::centred);
         }
     }
@@ -152,6 +153,7 @@ public:
     
     void makeTagsButtons();
     String getTagName(int id,TagType type=CHARACTERISTIC);
+    void tagFilter();
 
 	int loadLibrary();
 	int saveLibrary();
@@ -162,6 +164,9 @@ public:
     
     
 	void selectPreset(XmlElement* preset);
+    /**
+     should be with other sysex functions #TODO
+     */
 	static void changeSysexProgramName(uint8* program,String newName);
 	//void savePreset(XmlElement* preset);
 	static void getDataFromPreset(uint8_t* destData, XmlElement* sourcePreset);
